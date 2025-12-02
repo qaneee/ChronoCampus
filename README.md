@@ -1,4 +1,4 @@
-# University Timetable and Schedule Management System
+#⏱️University Timetable and Schedule Management System
 
 ## Install required dependencies 
 
