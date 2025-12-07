@@ -126,7 +126,7 @@ interface ClassSession {
   groups: string[];
   duration: string;
   week: 'numerator' | 'denominator' | 'both';
-  teachingGroup?: string; // Group code for lecturer view
+  teachingGroup?: string;
 }
 
 const mockTimetableData: ClassSession[] = [
@@ -330,7 +330,6 @@ export function Timetable({ userRole, onLogout, language }: TimetableProps) {
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Focus textarea and set cursor to end when dialog opens
   useEffect(() => {
     if (notesDialogOpen && textareaRef.current) {
       const textarea = textareaRef.current;

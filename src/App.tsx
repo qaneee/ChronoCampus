@@ -15,12 +15,11 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('en');
   const [userEmail, setUserEmail] = useState<string>('');
 
-  // Function to determine role based on email format
+  //  role based on email format
   const determineRoleFromEmail = (email: string): 'student' | 'lecturer' => {
     const emailPart = email.split('@')[0]; // Get part before @
     
-    // Check if email starts with letter.letter pattern (e.g., p.johnson, s.smith)
-    // This indicates a teacher/lecturer
+    // Check if email starts with letter
     const teacherPattern = /^[a-zA-Z]\.[a-zA-Z]/;
     
     if (teacherPattern.test(emailPart)) {

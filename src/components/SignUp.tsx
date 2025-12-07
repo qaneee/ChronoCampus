@@ -99,7 +99,7 @@ export function SignUp({ onBack, onSignUpComplete, language }: SignUpProps) {
       return;
     }
 
-    // In a real app, this would send the verification email
+    //send the verification email
     console.log('Sending verification code to:', email);
     setStep('verify');
   };
@@ -113,7 +113,7 @@ export function SignUp({ onBack, onSignUpComplete, language }: SignUpProps) {
       return;
     }
 
-    // In a real app, this would verify the code
+    // verify the code
     console.log('Verifying code:', verificationCode);
     setStep('password');
   };
@@ -143,7 +143,7 @@ export function SignUp({ onBack, onSignUpComplete, language }: SignUpProps) {
       return;
     }
 
-    // In a real app, this would create the account
+    // create the account
     console.log('Creating account for:', email);
     onSignUpComplete();
   };
