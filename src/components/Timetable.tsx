@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Clock, MapPin, Users, GraduationCap, LogOut, StickyNote, Shield, Calendar, X, Trash2, Plus, Edit } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -328,6 +328,20 @@ export function Timetable({ userRole, onLogout, language }: TimetableProps) {
   const [classNotes, setClassNotes] = useState<Record<number, string>>({});
   const [currentNote, setCurrentNote] = useState('');
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Focus textarea and set cursor to end when dialog opens
+  useEffect(() => {
+    if (notesDialogOpen && textareaRef.current) {
+      const textarea = textareaRef.current;
+      // Small delay to ensure the dialog is fully rendered
+      setTimeout(() => {
+        textarea.focus();
+        // Set cursor to the end
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }, 100);
+    }
+  }, [notesDialogOpen]);
 
   const filteredClasses = mockTimetableData.filter(
     (session) => session.day === selectedDay && (session.week === selectedWeek || session.week === 'both')
@@ -607,6 +621,7 @@ export function Timetable({ userRole, onLogout, language }: TimetableProps) {
                   {t.classNotes}
                 </label>
                 <Textarea
+                  ref={textareaRef}
                   id="notes"
                   placeholder={t.addNotesPlaceholder}
                   value={currentNote}

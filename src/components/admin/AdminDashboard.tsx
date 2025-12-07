@@ -125,22 +125,33 @@ export function AdminDashboard({ onLogout, language }: AdminDashboardProps) {
             );
           })}
         </nav>
-
-        {/* Logout Button */}
-        <div className="p-4 border-t border-gray-200">
-          <Button
-            onClick={onLogout}
-            variant="outline"
-            className="w-full flex items-center justify-center space-x-2"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>{t.logout}</span>
-          </Button>
-        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
+        {/* Top Header Bar with Logout */}
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-[#225b73] flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-[#225b73]">{t.adminPanel}</h2>
+                <p className="text-xs text-gray-500">ChronoCampus</p>
+              </div>
+            </div>
+            <Button
+              onClick={onLogout}
+              variant="outline"
+              className="flex items-center space-x-2 border-[#225b73] text-[#225b73] hover:bg-[#225b73] hover:text-white"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.logout}</span>
+            </Button>
+          </div>
+        </div>
+
         {activeTab === 'dashboard' && (
           <div className="p-4 sm:p-8">
             <div className="max-w-4xl lg:ml-0 ml-0 sm:ml-0">

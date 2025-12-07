@@ -119,7 +119,6 @@
     --text-3xl--line-height: calc(2.25 / 1.875);
     --text-5xl: 3rem;
     --text-5xl--line-height: 1;
-    --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --tracking-tight: -.025em;
@@ -405,46 +404,22 @@
     color: var(--foreground);
   }
 
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h1 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+  input[type="password"]::-ms-reveal {
+    display: none;
   }
 
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h2 {
-    font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+  input[type="password"]::-ms-clear {
+    display: none;
   }
 
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+  input[type="password"]::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    pointer-events: none;
   }
 
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) p {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.5;
-  }
-
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) label, :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) button {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) input {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.5;
+  input[type="password"]::-webkit-textfield-decoration-container {
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
@@ -2784,6 +2759,12 @@
     }
   }
 
+  @media (width >= 64rem) {
+    .lg\:px-8 {
+      padding-inline: calc(var(--spacing) * 8);
+    }
+  }
+
   .dark\:border-input:is(.dark *) {
     border-color: var(--input);
   }
@@ -2908,6 +2889,22 @@
 
   .\[\&_svg\:not\(\[class\*\=\'text-\'\]\)\]\:text-muted-foreground svg:not([class*="text-"]) {
     color: var(--muted-foreground);
+  }
+
+  .\[\&\:\:-ms-clear\]\:hidden::-ms-clear {
+    display: none;
+  }
+
+  .\[\&\:\:-ms-reveal\]\:hidden::-ms-reveal {
+    display: none;
+  }
+
+  .\[\&\:\:-webkit-credentials-auto-fill-button\]\:hidden::-webkit-credentials-auto-fill-button {
+    display: none;
+  }
+
+  .\[\&\:\:-webkit-textfield-decoration-container\]\:hidden::-webkit-textfield-decoration-container {
+    display: none;
   }
 
   .\[\.border-b\]\:pb-6.border-b {
