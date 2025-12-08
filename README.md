@@ -6,6 +6,12 @@
  npm i
  ```
 
+## Install TypeScript and React type definitions as development dependencies
+ 
+ ```bash
+ npm install -D typescript @types/react @types/react-dom
+ ```
+
 ## Run to start the development server
 
 ```bash
