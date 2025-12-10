@@ -3,10 +3,13 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Clock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from './ui/input-otp';
+import { LanguageSelector } from './LanguageSelector';
+import { DarkModeToggle } from './DarkModeToggle';
 
 interface ForgotPasswordProps {
   onBack: () => void;
   language: 'en' | 'hy' | 'ru';
+  onLanguageChange: (lang: 'en' | 'hy' | 'ru') => void;
 }
 
 type Step = 'email' | 'verify' | 'reset';
@@ -62,7 +65,7 @@ const translations = {
   }
 };
 
-export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
+export function ForgotPassword({ onBack, language, onLanguageChange }: ForgotPasswordProps) {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -77,6 +80,15 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
   const handleSendCode = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate @polytechnic.am email
+    if (!email.endsWith('@polytechnic.am')) {
+      setError(language === 'en' ? 'Email must end with @polytechnic.am' : 
+               language === 'hy' ? 'Էլ․ հասցեն պետք է ավարտվի @polytechnic.am-ով' :
+               'Email должен заканчиваться на @polytechnic.am');
+      return;
+    }
+    
     // Simulate sending code
     setStep('verify');
   };
@@ -112,24 +124,30 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 sm:p-10">
+    <div className="h-screen w-full flex flex-col items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 relative overflow-hidden">
+      {/* Top Right Controls */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 flex items-center gap-2">
+        <DarkModeToggle />
+        <LanguageSelector language={language} onLanguageChange={onLanguageChange} className="!relative !top-0 !right-0" />
+      </div>
+      
+      <div className="w-full max-w-md px-2 sm:px-0">
+        <div className="bg-white dark:bg-gray-800/90 rounded-xl shadow-xl dark:shadow-2xl dark:shadow-black/20 border border-gray-100 dark:border-gray-700/50 p-4 sm:p-6 md:p-8 lg:p-10">
           {/* Logo and Title */}
-          <div className="flex items-center justify-center gap-3 mb-6 sm:mb-8">
-            <div className="w-12 h-12 rounded-full bg-[#225b73] flex items-center justify-center flex-shrink-0">
-              <Clock className="w-7 h-7 text-white" />
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#225b73] dark:bg-gradient-to-br dark:from-violet-600 dark:to-purple-700 flex items-center justify-center flex-shrink-0 shadow-lg dark:shadow-violet-900/50">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
             </div>
-            <h1 className="text-[#225b73] text-3xl sm:text-5xl">ChronoCampus</h1>
+            <h1 className="text-[#225b73] dark:text-violet-300 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">ChronoCampus</h1>
           </div>
           
-          <p className="text-center text-gray-600 text-sm mb-6">
+          <p className="text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">
             {t.title}
           </p>
 
           {/* Email Step */}
           {step === 'email' && (
-            <form onSubmit={handleSendCode} className="space-y-4">
+            <form onSubmit={handleSendCode} className="space-y-3 sm:space-y-4">
               <div>
                 <Input
                   id="reset-email"
@@ -138,15 +156,17 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  pattern=".*@polytechnic\.am$"
-                  className="bg-input-background border-gray-300"
+                  className="bg-input-background dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500 h-11 sm:h-12 text-sm sm:text-base dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
                 />
               </div>
 
+              {error && (
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 p-2 rounded border border-red-200 dark:border-red-800/50">{error}</p>
+              )}
+
               <Button 
                 type="submit" 
-                className="w-full text-white hover:opacity-90"
-                style={{ backgroundColor: '#225b73' }}
+                className="w-full text-white hover:opacity-90 h-11 sm:h-12 text-sm sm:text-base touch-manipulation bg-[#225b73] dark:bg-gradient-to-r dark:from-violet-600 dark:to-purple-600 dark:hover:from-violet-500 dark:hover:to-purple-500 shadow-md dark:shadow-violet-900/30 transition-all"
               >
                 {t.sendCode}
               </Button>
@@ -155,13 +175,13 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
 
           {/* Verify Code Step */}
           {step === 'verify' && (
-            <form onSubmit={handleVerifyCode} className="space-y-4">
+            <form onSubmit={handleVerifyCode} className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
-                <p className="text-sm text-gray-700 text-center">
+                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 text-center">
                   {t.verifyStep}
                 </p>
-                <p className="text-xs text-gray-500 text-center mb-4">{t.verifyDesc}</p>
-                <div className="flex justify-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-3 sm:mb-4">{t.verifyDesc}</p>
+                <div className="flex justify-center scale-90 sm:scale-100">
                   <InputOTP maxLength={6} value={code} onChange={setCode}>
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
@@ -175,10 +195,13 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
                 </div>
               </div>
 
+              {error && (
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 p-2 rounded border border-red-200 dark:border-red-800/50">{error}</p>
+              )}
+
               <Button 
                 type="submit" 
-                className="w-full text-white hover:opacity-90"
-                style={{ backgroundColor: '#225b73' }}
+                className="w-full text-white hover:opacity-90 h-11 sm:h-12 text-sm sm:text-base touch-manipulation bg-[#225b73] dark:bg-gradient-to-r dark:from-violet-600 dark:to-purple-600 dark:hover:from-violet-500 dark:hover:to-purple-500 shadow-md dark:shadow-violet-900/30 transition-all"
                 disabled={code.length !== 6}
               >
                 {t.verify}
@@ -188,7 +211,7 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
 
           {/* Reset Password Step */}
           {step === 'reset' && (
-            <form onSubmit={handleResetPassword} className="space-y-4">
+            <form onSubmit={handleResetPassword} className="space-y-3 sm:space-y-4">
               <div className="relative">
                 <Input
                   id="new-password"
@@ -197,17 +220,17 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="bg-input-background border-gray-300 pr-10"
+                  className="bg-input-background dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500 pr-10 h-11 sm:h-12 text-sm sm:text-base dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-violet-400 touch-manipulation transition-colors"
                 >
                   {showPassword ? (
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <EyeOff className="w-4 h-4" />
+                    <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
                 </button>
               </div>
@@ -220,29 +243,28 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="bg-input-background border-gray-300 pr-10"
+                  className="bg-input-background dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500 pr-10 h-11 sm:h-12 text-sm sm:text-base dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-violet-400 touch-manipulation transition-colors"
                 >
                   {showConfirmPassword ? (
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <EyeOff className="w-4 h-4" />
+                    <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
                 </button>
               </div>
 
               {error && (
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 p-2 rounded border border-red-200 dark:border-red-800/50">{error}</p>
               )}
 
               <Button 
                 type="submit" 
-                className="w-full text-white hover:opacity-90"
-                style={{ backgroundColor: '#225b73' }}
+                className="w-full text-white hover:opacity-90 h-11 sm:h-12 text-sm sm:text-base touch-manipulation bg-[#225b73] dark:bg-gradient-to-r dark:from-violet-600 dark:to-purple-600 dark:hover:from-violet-500 dark:hover:to-purple-500 shadow-md dark:shadow-violet-900/30 transition-all"
               >
                 {t.resetPassword}
               </Button>
@@ -252,9 +274,9 @@ export function ForgotPassword({ onBack, language }: ForgotPasswordProps) {
           {/* Back Button */}
           <button
             onClick={onBack}
-            className="w-full mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-[#225b73] hover:underline"
+            className="w-full mt-3 sm:mt-4 md:mt-6 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-[#225b73] dark:text-violet-400 hover:underline touch-manipulation py-1 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {t.back}
           </button>
         </div>

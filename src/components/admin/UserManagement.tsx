@@ -65,7 +65,7 @@ const translations = {
     fullName: 'Անուն Ազգանուն',
     selectRole: 'Ընտրել դեր',
     allFieldsRequired: 'Խնդրում ենք լրացնել բոլոր պահանջվող դաշտերը',
-    invalidEmail: 'Էլ. փոստը պետք է վերածվի հետ @polytechnic.am'
+    invalidEmail: 'Էլ. փոստը պետք է ավարտվի @polytechnic.am-ով'
   },
   ru: {
     userManagement: 'Управление Пользователями',
@@ -243,10 +243,10 @@ export function UserManagement({ language }: UserManagementProps) {
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="mb-2">{t.userManagement}</h1>
-            <p className="text-gray-600">Manage students, teachers, and administrators</p>
+            <h1 className="mb-2 dark:text-gray-100">{t.userManagement}</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage students, teachers, and administrators</p>
           </div>
-          <Button onClick={handleAddUser} className="bg-[#225b73] hover:bg-[#1a4659] w-full sm:w-auto">
+          <Button onClick={handleAddUser} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-violet-600 dark:hover:bg-violet-700 w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             {t.addUser}
           </Button>
@@ -260,44 +260,44 @@ export function UserManagement({ language }: UserManagementProps) {
               placeholder={t.searchUsers}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
           </div>
         </div>
 
         {/* Users Table */}
-        <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
+        <Card className="overflow-hidden shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <div className="overflow-x-auto scroll-smooth">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {t.name}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {t.email}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {t.role}
                   </th>
-                  <th className="px-6 py-4 text-right text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {t.actions}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-[#225b73]/10 flex items-center justify-center mr-3">
-                          <User className="w-5 h-5 text-[#225b73]" />
+                        <div className="w-10 h-10 rounded-full bg-[#225b73]/10 dark:bg-violet-500/20 flex items-center justify-center mr-3">
+                          <User className="w-5 h-5 text-[#225b73] dark:text-violet-400" />
                         </div>
-                        <div className="text-gray-900">{user.name}</div>
+                        <div className="text-gray-900 dark:text-gray-100">{user.name}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-gray-600 dark:text-gray-400">
                         <Mail className="w-4 h-4 mr-2 text-gray-400" />
                         {user.email}
                       </div>
@@ -313,7 +313,7 @@ export function UserManagement({ language }: UserManagementProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditUser(user)}
-                        className="mr-2"
+                        className="mr-2 dark:hover:bg-gray-600"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -321,7 +321,7 @@ export function UserManagement({ language }: UserManagementProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteClick(user)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

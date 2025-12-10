@@ -5,3 +5,4 @@ package-lock.json
 .log
 guidelines/
 Attributions.md
+*.txt

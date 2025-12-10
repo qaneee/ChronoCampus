@@ -62,7 +62,7 @@ const translations = {
     groupName: 'Խմբի Անվանում',
     students: 'Ուսանողներ',
     classroom: 'Լսարան',
-    campus: 'Ամբիոն',
+    campus: 'Կորպուս',
     floor: 'Հարկ',
     room: 'Սենյակ',
     capacity: 'Տարողություն',
@@ -267,15 +267,15 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="mb-2">{t.groupsClassrooms}</h1>
-          <p className="text-gray-600">Manage student groups and classrooms</p>
+          <h1 className="mb-2 dark:text-gray-100">{t.groupsClassrooms}</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage student groups and classrooms</p>
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="groups" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="groups">{t.groups}</TabsTrigger>
-            <TabsTrigger value="classrooms">{t.classrooms}</TabsTrigger>
+          <TabsList className="mb-6 dark:bg-gray-800 dark:border-gray-700">
+            <TabsTrigger value="groups" className="dark:data-[state=active]:bg-gray-700 dark:text-gray-300">{t.groups}</TabsTrigger>
+            <TabsTrigger value="classrooms" className="dark:data-[state=active]:bg-gray-700 dark:text-gray-300">{t.classrooms}</TabsTrigger>
           </TabsList>
 
           {/* Groups Tab */}
@@ -287,56 +287,56 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                   placeholder={t.searchGroups}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 />
               </div>
-              <Button onClick={handleAddGroup} className="bg-[#225b73] hover:bg-[#1a4659]">
+              <Button onClick={handleAddGroup} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-violet-600 dark:hover:bg-violet-700">
                 <Plus className="w-4 h-4 mr-2" />
                 {t.addGroup}
               </Button>
             </div>
 
-            <Card className="overflow-hidden">
-              <div className="overflow-x-auto">
+            <Card className="overflow-hidden shadow-sm dark:bg-gray-800 dark:border-gray-700">
+              <div className="overflow-x-auto scroll-smooth">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.groupCode}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.groupName}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.year}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.students}
                       </th>
-                      <th className="px-6 py-4 text-right text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.actions}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredGroups.map((group) => (
-                      <tr key={group.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={group.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Badge className="bg-[#225b73] text-white">{group.code}</Badge>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center mr-3">
-                              <Users className="w-5 h-5 text-purple-600" />
+                            <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center mr-3">
+                              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                             </div>
-                            <div className="text-gray-900">{group.name}</div>
+                            <div className="text-gray-900 dark:text-gray-100">{group.name}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600">Year {group.year}</span>
+                          <span className="text-gray-600 dark:text-gray-400">Year {group.year}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600">{group.studentCount} students</span>
+                          <span className="text-gray-600 dark:text-gray-400">{group.studentCount} students</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <Button
@@ -373,59 +373,59 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                   placeholder={t.searchClassrooms}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 />
               </div>
-              <Button onClick={handleAddClassroom} className="bg-[#225b73] hover:bg-[#1a4659]">
+              <Button onClick={handleAddClassroom} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-violet-600 dark:hover:bg-violet-700">
                 <Plus className="w-4 h-4 mr-2" />
                 {t.addClassroom}
               </Button>
             </div>
 
-            <Card className="overflow-hidden">
-              <div className="overflow-x-auto">
+            <Card className="overflow-hidden shadow-sm dark:bg-gray-800 dark:border-gray-700">
+              <div className="overflow-x-auto scroll-smooth">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.classroomNumber}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.campus}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.floor}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.room}
                       </th>
-                      <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.capacity}
                       </th>
-                      <th className="px-6 py-4 text-right text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.actions}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredClassrooms.map((classroom) => (
-                      <tr key={classroom.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={classroom.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center mr-3">
-                              <Building2 className="w-5 h-5 text-green-600" />
+                            <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center mr-3">
+                              <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
-                            <div className="text-gray-900">{classroom.number}</div>
+                            <div className="text-gray-900 dark:text-gray-100">{classroom.number}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600">Campus {classroom.campus}</span>
+                          <span className="text-gray-600 dark:text-gray-400">Campus {classroom.campus}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600">Floor {classroom.floor}</span>
+                          <span className="text-gray-600 dark:text-gray-400">Floor {classroom.floor}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600">Room {classroom.room}</span>
+                          <span className="text-gray-600 dark:text-gray-400">Room {classroom.room}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Badge variant="outline">{classroom.capacity} seats</Badge>

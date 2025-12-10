@@ -6,7 +6,7 @@
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: #ffffff;
   --popover-foreground: oklch(0.145 0 0);
   --primary: #030213;
   --primary-foreground: oklch(1 0 0);
@@ -39,6 +39,18 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --font-size: 14px;
+  }
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --font-size: 18px;
+  }
 }
 
 .dark {
@@ -128,19 +140,74 @@
     @apply bg-background text-foreground;
   }
 
-  /* Hide native password reveal buttons */
   input[type="password"]::-ms-reveal,
-  input[type="password"]::-ms-clear {
-    display: none;
-  }
-
+  input[type="password"]::-ms-clear,
   input[type="password"]::-webkit-credentials-auto-fill-button,
   input[type="password"]::-webkit-textfield-decoration-container {
+    display: none;
     visibility: hidden;
     pointer-events: none;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(34, 91, 115, 0.2) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(34, 91, 115, 0.2);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.2s ease;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 91, 115, 0.4);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: rgba(34, 91, 115, 0.6);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  
+  /* Smooth scrolling for all elements */
+  * {
+    scroll-behavior: smooth;
+  }
+  
+  /* Better scrolling for specific areas */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
 html {
   font-size: var(--font-size);
+}
+
+/* Hide scrollbar for horizontal navigation */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }

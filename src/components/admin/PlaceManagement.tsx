@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, AlertTriangle, Calendar, Clock, MapPin, Users, BookOpen, CheckCircle2, XCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, Search, Edit, Trash2, AlertTriangle, Calendar, Clock, MapPin, Users, BookOpen, CheckCircle2, XCircle, Filter, Building2, GraduationCap } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import {
   AlertDialog,
@@ -18,13 +18,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { useAdmin } from '../../contexts/AdminContext';
+import type { Schedule } from '../../contexts/AdminContext';
 
 const translations = {
   en: {
     placeManagement: 'Schedule & Place Management',
-    subtitle: 'Comprehensive class scheduling with conflict detection and capacity management',
+    subtitle: 'Create and manage class schedules with intelligent conflict detection',
     addSchedule: 'Add Schedule',
-    searchSchedules: 'Search schedules...',
+    searchSchedules: 'Search by subject, teacher, group...',
     subject: 'Subject',
     teacher: 'Teacher',
     classroom: 'Classroom',
@@ -54,29 +57,36 @@ const translations = {
     wednesday: 'Wednesday',
     thursday: 'Thursday',
     friday: 'Friday',
-    numerator: 'Numerator',
-    denominator: 'Denominator',
-    both: 'Both',
+    numerator: 'Week 1 (Numerator)',
+    denominator: 'Week 2 (Denominator)',
+    both: 'Both Weeks',
     conflictsDetected: 'Conflicts Detected!',
-    warningsDetected: 'Warnings Detected',
+    warningsDetected: 'Warnings',
     teacherConflict: 'Teacher is already scheduled at this time',
-    classroomConflict: 'Classroom is already booked at this time',
-    groupConflict: 'Group already has a class at this time',
-    capacityWarning: 'Classroom capacity insufficient for group size',
-    cannotSave: 'Cannot save due to time conflicts',
-    canSaveWithWarning: 'You can save but please review capacity warnings',
-    noConflicts: 'No conflicts or warnings detected',
-    allFieldsRequired: 'Please fill in all fields',
+    classroomConflict: 'Classroom is already booked',
+    groupConflict: 'Group already has a class',
+    capacityWarning: 'Classroom capacity insufficient',
+    cannotSave: 'Cannot save due to conflicts',
+    canSaveWithWarning: 'You can save with warnings',
+    noConflicts: 'No conflicts detected',
+    allFieldsRequired: 'Please fill in all required fields',
     students: 'students',
     seats: 'seats',
     overcapacity: 'Overcapacity',
-    okCapacity: 'OK'
+    okCapacity: 'OK',
+    all: 'All Days',
+    filterByDay: 'Filter by Day',
+    totalSchedules: 'Total Schedules',
+    noResults: 'No schedules found',
+    viewByDay: 'View by Day',
+    viewAll: 'View All',
+    campus: 'Campus'
   },
   hy: {
     placeManagement: 'Ժամանակացույցի և Տեղանքի Կառավարում',
-    subtitle: 'Համապարփակ դասերի ժամանակացույց հակասությունների հայտնաբերմամբ և տարողության կառավարմամբ',
+    subtitle: 'Ստեղծեք և կառավարեք դասերի ժամանակացույցը խելացի հակասությունների հայտնաբերմամբ',
     addSchedule: 'Ավելացնել Ժամանակացույց',
-    searchSchedules: 'Փնտրել ժամանակացույցեր...',
+    searchSchedules: 'Փնտրել ըստ առարկայի, դասախոսի, խմբի...',
     subject: 'Առարկա',
     teacher: 'Դասախոս',
     classroom: 'Լսարան',
@@ -93,42 +103,49 @@ const translations = {
     editSchedule: 'Խմբագրել Ժամանակացույցը',
     addNewSchedule: 'Ավելացնել Նոր Ժամանակացույց',
     confirmDelete: 'Հաստատել Ջնջումը',
-    confirmDeleteMessage: 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս ժամանակացույցը: Այս գործողությունը հնարավոր չէ հետ շրջել:',
+    confirmDeleteMessage: 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս ժամանակացույցը:',
     selectSubject: 'Ընտրել առարկա',
     selectTeacher: 'Ընտրել դասախոս',
     selectClassroom: 'Ընտրել լսարան',
     selectGroup: 'Ընտրել խումբ',
     selectDay: 'Ընտրել օր',
-    selectTime: 'Ընտրել ժամային պարապմունք',
+    selectTime: 'Ընտրել ժամը',
     selectWeek: 'Ընտրել շաբաթ',
     monday: 'Երկուշաբթի',
     tuesday: 'Երեքշաբթի',
     wednesday: 'Չորեքշաբթի',
     thursday: 'Հինգշաբթի',
     friday: 'Ուրբաթ',
-    numerator: 'Համարիչ',
-    denominator: 'Հայտարար',
-    both: 'Երկուսն էլ',
+    numerator: 'Շաբաթ 1 (Թվիչ)',
+    denominator: 'Շաբաթ 2 (Հայտարար)',
+    both: 'Երկու Շաբաթներ',
     conflictsDetected: 'Հայտնաբերված են Հակասություններ',
-    warningsDetected: 'Հայտնաբերված են Նախազգուշացումներ',
-    teacherConflict: 'Դասախոսը արդեն նշանակված է այս ժամին',
-    classroomConflict: 'Լսարանը արդեն զբաղված է այս ժամին',
-    groupConflict: 'Խումբը արդեն ունի դաս այս ժամին',
-    capacityWarning: 'Լսարանի տարողությունը անբավարար է խմբի չափի համար',
-    cannotSave: 'Հնարավոր չէ պահպանել ժամանակային հակասությունների պատճառով',
-    canSaveWithWarning: 'Կարող եք պահպանել, բայց խնդրում ենք վերանայել տարողության նախազգուշացումները',
-    noConflicts: 'Հակասություններ կամ նախազգուշացումներ չեն հայտնաբերվել',
+    warningsDetected: 'Նախազգուշացումներ',
+    teacherConflict: 'Դասախոսը արդեն զբաղված է այս ժամին',
+    classroomConflict: 'Լսարանը արդեն զբաղված է',
+    groupConflict: 'Խումբն արդեն ունի դաս',
+    capacityWarning: 'Լսարանի տարողությունը անբավարար է',
+    cannotSave: 'Հնարավոր չէ պահպանել հակասությունների պատճառով',
+    canSaveWithWarning: 'Կարող եք պահպանել նախազգուշացումներով',
+    noConflicts: 'Հակասություններ չեն հայտնաբերվել',
     allFieldsRequired: 'Խնդրում ենք լրացնել բոլոր դաշտերը',
     students: 'ուսանողներ',
     seats: 'նստատեղեր',
     overcapacity: 'Գերազանց',
-    okCapacity: 'Լավ'
+    okCapacity: 'Լավ',
+    all: 'Բոլոր Օրերը',
+    filterByDay: 'Ֆիլտրել ըստ օրվա',
+    totalSchedules: 'Ընդհանուր Ժամանակացույցեր',
+    noResults: 'Ժամանակացույցեր չեն գտնվել',
+    viewByDay: 'Դիտել ըստ օրվա',
+    viewAll: 'Դիտել Բոլորը',
+    campus: 'Քեմփուս'
   },
   ru: {
     placeManagement: 'Управление Расписанием и Местами',
-    subtitle: 'Комплексное планирование занятий с обнаружением конфликтов и управлением вместимостью',
+    subtitle: 'Создавайте и управляйте расписанием занятий с умным обнаружением конфликтов',
     addSchedule: 'Добавить Расписание',
-    searchSchedules: 'Искать расписания...',
+    searchSchedules: 'Поиск по предмету, преподавателю, группе...',
     subject: 'Предмет',
     teacher: 'Преподаватель',
     classroom: 'Аудитория',
@@ -145,55 +162,45 @@ const translations = {
     editSchedule: 'Редактировать Расписание',
     addNewSchedule: 'Добавить Новое Расписание',
     confirmDelete: 'Подтвердить Удаление',
-    confirmDeleteMessage: 'Вы уверены, что хотите удалить это расписание? Это действие нельзя отменить.',
+    confirmDeleteMessage: 'Вы уверены, что хотите удалить это расписание?',
     selectSubject: 'Выберите предмет',
     selectTeacher: 'Выберите преподавателя',
     selectClassroom: 'Выберите аудиторию',
     selectGroup: 'Выберите группу',
     selectDay: 'Выберите день',
-    selectTime: 'Выберите временной интервал',
+    selectTime: 'Выберите время',
     selectWeek: 'Выберите неделю',
     monday: 'Понедельник',
     tuesday: 'Вторник',
     wednesday: 'Среда',
     thursday: 'Четверг',
     friday: 'Пятница',
-    numerator: 'Числитель',
-    denominator: 'Знаменатель',
-    both: 'Обе',
-    conflictsDetected: 'Обнаружены Конфликты!',
-    warningsDetected: 'Обнаружены Предупреждения',
+    numerator: 'Неделя 1 (Числитель)',
+    denominator: 'Неделя 2 (Знаменатель)',
+    both: 'Обе Недели',
+    conflictsDetected: 'Обнаружены Конфликты',
+    warningsDetected: 'Предупреждения',
     teacherConflict: 'Преподаватель уже занят в это время',
-    classroomConflict: 'Аудитория уже занята в это время',
-    groupConflict: 'Группа уже имеет занятие в это время',
-    capacityWarning: 'Вместимость аудитории недостаточна для размера группы',
-    cannotSave: 'Невозможно сохранить из-за временных конфликтов',
-    canSaveWithWarning: 'Вы можете сохранить, но пожалуйста, проверьте предупреждения о вместимости',
-    noConflicts: 'Конфликты или предупреждения не обнаружены',
-    allFieldsRequired: 'Пожалуйста, заполните все поля',
+    classroomConflict: 'Аудитория уже занята',
+    groupConflict: 'У группы уже есть занятие',
+    capacityWarning: 'Недостаточная вместимость аудитории',
+    cannotSave: 'Невозможно сохранить из-за конфликтов',
+    canSaveWithWarning: 'Можно сохранить с предупреждениями',
+    noConflicts: 'Конфликтов не обнаружено',
+    allFieldsRequired: 'Пожалуйста, заполните все обязательные поля',
     students: 'студентов',
     seats: 'мест',
     overcapacity: 'Превышение',
-    okCapacity: 'OK'
+    okCapacity: 'OK',
+    all: 'Все Дни',
+    filterByDay: 'Фильтр по дню',
+    totalSchedules: 'Всего Расписаний',
+    noResults: 'Расписания не найдены',
+    viewByDay: 'Просмотр по дням',
+    viewAll: 'Все',
+    campus: 'Кампус'
   }
 };
-
-interface Schedule {
-  id: number;
-  subjectId: number;
-  subjectName: string;
-  teacherId: number;
-  teacherName: string;
-  classroomId: number;
-  classroomNumber: string;
-  classroomCapacity: number;
-  groupId: number;
-  groupCode: string;
-  groupSize: number;
-  day: string;
-  timeSlot: string;
-  week: 'numerator' | 'denominator' | 'both';
-}
 
 interface PlaceManagementProps {
   language: 'en' | 'hy' | 'ru';
@@ -206,85 +213,39 @@ interface ConflictCheck {
   capacityWarning?: string;
 }
 
-const mockSubjects = [
-  { id: 1, name: 'Computer Science Fundamentals', code: 'IT101' },
-  { id: 2, name: 'Mathematics for Computing', code: 'MT205' },
-  { id: 3, name: 'Database Systems', code: 'DB319' },
-  { id: 4, name: 'Web Development', code: 'WD217' },
-  { id: 5, name: 'Software Engineering', code: 'SE401' },
-];
-
-const mockTeachers = [
-  { id: 1, name: 'Prof. Sarah Johnson' },
-  { id: 2, name: 'Prof. Michael Chen' },
-  { id: 3, name: 'Prof. Emily Watson' },
-  { id: 4, name: 'Prof. James Martinez' },
-  { id: 5, name: 'Prof. Linda Brown' },
-];
-
-const mockClassrooms = [
-  { id: 1, number: '3201', capacity: 30 },
-  { id: 2, number: '5308', capacity: 40 },
-  { id: 3, number: '12405', capacity: 35 },
-  { id: 4, number: '7210', capacity: 25 },
-  { id: 5, number: '1503', capacity: 50 },
-];
-
-const mockGroups = [
-  { id: 1, code: 'CS-1A', size: 25 },
-  { id: 2, code: 'CS-1B', size: 28 },
-  { id: 3, code: 'CS-2A', size: 32 },
-  { id: 4, code: 'CS-2B', size: 24 },
-  { id: 5, code: 'CS-3A', size: 35 },
-];
-
 const timeSlots = [
   '09:30 - 10:50',
   '11:00 - 12:20',
-  '12:50 - 14:10',
-  '14:20 - 15:40',
-  '15:50 - 17:10'
+  '12:30 - 13:50',
+  '14:00 - 15:20',
+  '15:30 - 16:50',
+  '17:00 - 18:20'
 ];
 
-const initialSchedules: Schedule[] = [
-  {
-    id: 1,
-    subjectId: 1,
-    subjectName: 'Computer Science Fundamentals',
-    teacherId: 1,
-    teacherName: 'Prof. Sarah Johnson',
-    classroomId: 1,
-    classroomNumber: '3201',
-    classroomCapacity: 30,
-    groupId: 1,
-    groupCode: 'CS-1A',
-    groupSize: 25,
-    day: 'Monday',
-    timeSlot: '09:30 - 10:50',
-    week: 'both'
-  },
-  {
-    id: 2,
-    subjectId: 2,
-    subjectName: 'Mathematics for Computing',
-    teacherId: 2,
-    teacherName: 'Prof. Michael Chen',
-    classroomId: 2,
-    classroomNumber: '5308',
-    classroomCapacity: 40,
-    groupId: 1,
-    groupCode: 'CS-1A',
-    groupSize: 25,
-    day: 'Monday',
-    timeSlot: '11:00 - 12:20',
-    week: 'numerator'
-  },
-];
+// Format time for better readability
+const formatTime = (timeSlot: string) => {
+  return timeSlot.replace(' - ', ' – '); // Use en-dash for better typography
+};
 
 export function PlaceManagement({ language }: PlaceManagementProps) {
   const t = translations[language];
-  const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
+  const {
+    schedules,
+    subjects,
+    users,
+    groups,
+    classrooms,
+    addSchedule,
+    updateSchedule,
+    deleteSchedule,
+    getUsersByRole
+  } = useAdmin();
+  
+  const teachers = getUsersByRole('teacher');
+  
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDay, setSelectedDay] = useState<string>('All');
+  const [viewMode, setViewMode] = useState<'all' | 'day'>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
@@ -312,38 +273,36 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
     { key: 'Friday', label: t.friday }
   ];
 
-  const filteredSchedules = schedules.filter(
-    (schedule) =>
-      schedule.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      schedule.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      schedule.groupCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      schedule.classroomNumber.includes(searchTerm)
-  );
+  const filteredSchedules = useMemo(() => {
+    return schedules.filter((schedule) => {
+      const matchesSearch = schedule.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        schedule.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        schedule.groupCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        schedule.classroomNumber.includes(searchTerm);
+      
+      const matchesDay = selectedDay === 'All' || schedule.day === selectedDay;
+      
+      return matchesSearch && matchesDay;
+    });
+  }, [schedules, searchTerm, selectedDay]);
 
   const checkAllConflicts = (data: typeof formData, currentScheduleId?: number): ConflictCheck => {
     const timeConflicts: string[] = [];
     let capacityWarning: string | undefined;
     
-    // Get selected classroom and group for capacity check
-    const selectedClassroom = mockClassrooms.find((c) => c.id === data.classroomId);
-    const selectedGroup = mockGroups.find((g) => g.id === data.groupId);
+    const selectedClassroom = classrooms.find((c) => c.id === data.classroomId);
+    const selectedGroup = groups.find((g) => g.id === data.groupId);
     
-    // Check capacity
     if (selectedClassroom && selectedGroup) {
       if (selectedGroup.size > selectedClassroom.capacity) {
         capacityWarning = `${t.capacityWarning}: ${selectedGroup.size} ${t.students} > ${selectedClassroom.capacity} ${t.seats}`;
       }
     }
     
-    // Check time conflicts
     schedules.forEach((schedule) => {
-      // Skip the schedule being edited
       if (currentScheduleId && schedule.id === currentScheduleId) return;
-      
-      // Check if it's the same day and time
       if (schedule.day !== data.day || schedule.timeSlot !== data.timeSlot) return;
       
-      // Check if weeks overlap
       const weeksOverlap = 
         data.week === 'both' || 
         schedule.week === 'both' || 
@@ -351,17 +310,12 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
       
       if (!weeksOverlap) return;
       
-      // Teacher conflict
       if (schedule.teacherId === data.teacherId) {
         timeConflicts.push(t.teacherConflict);
       }
-      
-      // Classroom conflict
       if (schedule.classroomId === data.classroomId) {
         timeConflicts.push(t.classroomConflict);
       }
-      
-      // Group conflict
       if (schedule.groupId === data.groupId) {
         timeConflicts.push(t.groupConflict);
       }
@@ -370,9 +324,19 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
     return {
       hasTimeConflicts: timeConflicts.length > 0,
       hasCapacityWarning: !!capacityWarning,
-      timeConflicts: [...new Set(timeConflicts)], // Remove duplicates
+      timeConflicts: [...new Set(timeConflicts)],
       capacityWarning
     };
+  };
+
+  const handleFormChange = (field: string, value: any) => {
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
+    
+    if (newData.day && newData.timeSlot && newData.teacherId && newData.classroomId && newData.groupId) {
+      const conflicts = checkAllConflicts(newData, editingSchedule?.id);
+      setConflictCheck(conflicts);
+    }
   };
 
   const handleAddSchedule = () => {
@@ -420,77 +384,53 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
 
   const handleDeleteConfirm = () => {
     if (scheduleToDelete) {
-      setSchedules(schedules.filter((s) => s.id !== scheduleToDelete.id));
+      deleteSchedule(scheduleToDelete.id);
       setDeleteDialogOpen(false);
       setScheduleToDelete(null);
     }
   };
 
-  const handleFormChange = (field: string, value: any) => {
-    const newFormData = { ...formData, [field]: value };
-    setFormData(newFormData);
-    
-    // Check for conflicts when key fields are filled
-    if (newFormData.day && newFormData.timeSlot && newFormData.teacherId && newFormData.classroomId && newFormData.groupId) {
-      const conflicts = checkAllConflicts(newFormData, editingSchedule?.id);
-      setConflictCheck(conflicts);
-    } else {
-      setConflictCheck({
-        hasTimeConflicts: false,
-        hasCapacityWarning: false,
-        timeConflicts: [],
-      });
-    }
-  };
-
   const handleSave = () => {
-    // Validate all fields are filled
-    if (!formData.subjectId || !formData.teacherId || !formData.classroomId || !formData.groupId || !formData.day || !formData.timeSlot) {
-      alert(t.allFieldsRequired);
+    if (!formData.subjectId || !formData.teacherId || !formData.classroomId || 
+        !formData.groupId || !formData.day || !formData.timeSlot) {
       return;
     }
 
-    // Don't allow saving if there are TIME conflicts (capacity warnings are OK)
     if (conflictCheck.hasTimeConflicts) {
       return;
     }
-    
-    const subject = mockSubjects.find((s) => s.id === formData.subjectId);
-    const teacher = mockTeachers.find((t) => t.id === formData.teacherId);
-    const classroom = mockClassrooms.find((c) => c.id === formData.classroomId);
-    const group = mockGroups.find((g) => g.id === formData.groupId);
-    
+
+    const subject = subjects.find((s) => s.id === formData.subjectId);
+    const teacher = teachers.find((t) => t.id === formData.teacherId);
+    const classroom = classrooms.find((c) => c.id === formData.classroomId);
+    const group = groups.find((g) => g.id === formData.groupId);
+
     if (!subject || !teacher || !classroom || !group) return;
-    
+
+    const scheduleData: Omit<Schedule, 'id'> = {
+      subjectId: formData.subjectId,
+      subjectName: subject.name,
+      subjectCode: subject.code,
+      teacherId: formData.teacherId,
+      teacherName: teacher.name,
+      classroomId: formData.classroomId,
+      classroomNumber: classroom.number,
+      classroomCapacity: classroom.capacity,
+      groupId: formData.groupId,
+      groupCode: group.code,
+      groupSize: group.size,
+      day: formData.day,
+      timeSlot: formData.timeSlot,
+      week: formData.week,
+      duration: 80,
+      assignmentId: 0,
+      semesterId: 1
+    };
+
     if (editingSchedule) {
-      setSchedules(
-        schedules.map((s) =>
-          s.id === editingSchedule.id
-            ? {
-                ...s,
-                ...formData,
-                subjectName: subject.name,
-                teacherName: teacher.name,
-                classroomNumber: classroom.number,
-                classroomCapacity: classroom.capacity,
-                groupCode: group.code,
-                groupSize: group.size
-              }
-            : s
-        )
-      );
+      updateSchedule(editingSchedule.id, scheduleData);
     } else {
-      const newSchedule: Schedule = {
-        id: Math.max(...schedules.map((s) => s.id), 0) + 1,
-        ...formData,
-        subjectName: subject.name,
-        teacherName: teacher.name,
-        classroomNumber: classroom.number,
-        classroomCapacity: classroom.capacity,
-        groupCode: group.code,
-        groupSize: group.size
-      };
-      setSchedules([...schedules, newSchedule]);
+      addSchedule(scheduleData);
     }
     setDialogOpen(false);
   };
@@ -498,11 +438,11 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
   const getWeekBadgeColor = (week: Schedule['week']) => {
     switch (week) {
       case 'numerator':
-        return 'bg-blue-500 text-white';
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
       case 'denominator':
-        return 'bg-purple-500 text-white';
-      case 'both':
-        return 'bg-green-500 text-white';
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300';
+      default:
+        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
     }
   };
 
@@ -512,26 +452,9 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
         return t.numerator;
       case 'denominator':
         return t.denominator;
-      case 'both':
+      default:
         return t.both;
     }
-  };
-
-  const getCapacityStatus = (schedule: Schedule) => {
-    if (schedule.groupSize > schedule.classroomCapacity) {
-      return {
-        status: 'overcapacity',
-        color: 'text-red-600',
-        bgColor: 'bg-red-50',
-        icon: <XCircle className="w-4 h-4" />
-      };
-    }
-    return {
-      status: 'ok',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      icon: <CheckCircle2 className="w-4 h-4" />
-    };
   };
 
   return (
@@ -540,221 +463,361 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="mb-2">{t.placeManagement}</h1>
-            <p className="text-gray-600">{t.subtitle}</p>
+            <h1 className="text-2xl sm:text-3xl mb-2 text-gray-900 dark:text-gray-100">{t.placeManagement}</h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">{t.subtitle}</p>
           </div>
-          <Button onClick={handleAddSchedule} className="bg-[#225b73] hover:bg-[#1a4659] w-full sm:w-auto">
+          <Button onClick={handleAddSchedule} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-violet-600 dark:hover:bg-violet-700 w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             {t.addSchedule}
           </Button>
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
+        {/* Search & Filters */}
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               placeholder={t.searchSchedules}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
           </div>
+          <Select value={selectedDay} onValueChange={setSelectedDay}>
+            <SelectTrigger className="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+              <SelectItem value="All" className="dark:text-gray-100 dark:focus:bg-gray-600">{t.all}</SelectItem>
+              {days.map((day) => (
+                <SelectItem key={day.key} value={day.key} className="dark:text-gray-100 dark:focus:bg-gray-600">
+                  {day.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Schedules Table */}
-        <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.subject}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.teacher}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.group}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.day}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.time}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.classroom}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.capacity}
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    {t.week}
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs text-gray-500 uppercase tracking-wider">
-                    {t.actions}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSchedules.map((schedule) => {
-                  const capacityStatus = getCapacityStatus(schedule);
-                  return (
-                    <tr key={schedule.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          <BookOpen className="w-4 h-4 mr-2 text-gray-400" />
-                          <span className="text-gray-900">{schedule.subjectName}</span>
+        {/* View Mode Tabs */}
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'all' | 'day')} className="mb-6">
+          <TabsList className="dark:bg-gray-800">
+            <TabsTrigger value="all" className="dark:data-[state=active]:bg-gray-700">{t.viewAll}</TabsTrigger>
+            <TabsTrigger value="day" className="dark:data-[state=active]:bg-gray-700">{t.viewByDay}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="mt-6">
+            {/* Desktop Table */}
+            <Card className="overflow-hidden shadow-sm hidden lg:block dark:bg-gray-800 dark:border-gray-700">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.subject}</th>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.teacher}</th>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.group}</th>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.day}</th>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.time}</th>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.classroom}</th>
+                      <th className="px-4 py-3 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.week}</th>
+                      <th className="px-4 py-3 text-right text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredSchedules.map((schedule) => {
+                      const isOvercapacity = schedule.groupSize > schedule.classroomCapacity;
+                      return (
+                        <tr key={schedule.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mr-2 flex-shrink-0">
+                                <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{schedule.subjectName}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{schedule.subjectCode}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center text-sm text-gray-900 dark:text-gray-100">
+                              <GraduationCap className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                              <span className="truncate">{schedule.teacherName}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <Badge variant="outline" className="text-[#225b73] dark:text-violet-400 border-[#225b73] dark:border-violet-400">
+                              {schedule.groupCode}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center text-sm text-gray-900 dark:text-gray-100">
+                              <Calendar className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                              {days.find(d => d.key === schedule.day)?.label}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                              <Clock className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                              {formatTime(schedule.timeSlot)}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                                <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{schedule.classroomNumber}</div>
+                                <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  <span className={isOvercapacity ? 'text-red-600 dark:text-red-400' : ''}>
+                                    {schedule.groupSize}/{schedule.classroomCapacity}
+                                  </span>
+                                  {isOvercapacity && <AlertTriangle className="w-3 h-3 ml-1 text-red-600 dark:text-red-400" />}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <Badge className={getWeekBadgeColor(schedule.week)}>
+                              {getWeekLabel(schedule.week)}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditSchedule(schedule)}
+                                className="dark:hover:bg-gray-700"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteClick(schedule)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {/* Mobile/Tablet Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+              {filteredSchedules.map((schedule) => {
+                const isOvercapacity = schedule.groupSize > schedule.classroomCapacity;
+                return (
+                  <Card key={schedule.id} className="overflow-hidden hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+                    <div className="p-4 sm:p-5">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start space-x-3 flex-1 min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">{schedule.subjectName}</h3>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs text-[#225b73] dark:text-violet-400 border-[#225b73] dark:border-violet-400">
+                                {schedule.subjectCode}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs text-[#225b73] dark:text-violet-400 border-[#225b73] dark:border-violet-400">
+                                {schedule.groupCode}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-600">{schedule.teacherName}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-gray-400" />
-                          <Badge className="bg-[#225b73] text-white">{schedule.groupCode}</Badge>
-                          <span className="text-xs text-gray-500">({schedule.groupSize})</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-gray-600">
-                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                          {days.find((d) => d.key === schedule.day)?.label}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-gray-600">
-                          <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                          {schedule.timeSlot}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center text-gray-600">
-                          <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                          {schedule.classroomNumber}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className={`flex items-center gap-1 px-2 py-1 rounded ${capacityStatus.bgColor}`}>
-                          {capacityStatus.icon}
-                          <span className={`text-xs ${capacityStatus.color}`}>
-                            {schedule.groupSize}/{schedule.classroomCapacity}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge className={getWeekBadgeColor(schedule.week)}>
-                          {getWeekLabel(schedule.week)}
+                        <Badge className={`${getWeekBadgeColor(schedule.week)} text-xs whitespace-nowrap ml-2`}>
+                          {schedule.week === 'both' ? t.both : schedule.week === 'numerator' ? 'W1' : 'W2'}
                         </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      </div>
+
+                      {/* Details */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <GraduationCap className="w-4 h-4 mr-2 flex-shrink-0" />
+                          <span className="truncate">{schedule.teacherName}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                          {days.find(d => d.key === schedule.day)?.label}
+                          <span className="mx-2">•</span>
+                          <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
+                          {formatTime(schedule.timeSlot)}
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center text-gray-600 dark:text-gray-400">
+                            <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                            {schedule.classroomNumber}
+                          </div>
+                          <div className={`flex items-center ${isOvercapacity ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                            <Users className="w-4 h-4 mr-1" />
+                            {schedule.groupSize}/{schedule.classroomCapacity}
+                            {isOvercapacity && <AlertTriangle className="w-4 h-4 ml-1" />}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleEditSchedule(schedule)}
-                          className="mr-2"
+                          className="flex-1 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-4 h-4 mr-2" />
+                          {t.edit}
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDeleteClick(schedule)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="flex-1 text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {t.delete}
                         </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="day" className="mt-6">
+            <div className="space-y-6">
+              {days.map((day) => {
+                const daySchedules = filteredSchedules.filter(s => s.day === day.key);
+                if (daySchedules.length === 0) return null;
+                
+                return (
+                  <Card key={day.key} className="dark:bg-gray-800 dark:border-gray-700">
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                        <Calendar className="w-5 h-5 mr-2 text-[#225b73] dark:text-violet-400" />
+                        {day.label}
+                        <Badge variant="secondary" className="ml-2 dark:bg-gray-700 dark:text-gray-200">
+                          {daySchedules.length}
+                        </Badge>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {daySchedules.map((schedule) => {
+                          const isOvercapacity = schedule.groupSize > schedule.classroomCapacity;
+                          return (
+                            <div key={schedule.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{schedule.subjectName}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">{schedule.groupCode}</div>
+                                </div>
+                                <Badge className={`${getWeekBadgeColor(schedule.week)} text-xs ml-2`}>
+                                  {schedule.week === 'both' ? 'B' : schedule.week === 'numerator' ? 'N' : 'D'}
+                                </Badge>
+                              </div>
+                              <div className="space-y-1 mb-3">
+                                <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                                  <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  {formatTime(schedule.timeSlot)}
+                                </div>
+                                <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                                  <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  {schedule.classroomNumber}
+                                </div>
+                              </div>
+                              <div className="flex space-x-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditSchedule(schedule)}
+                                  className="flex-1 h-7 text-xs dark:hover:bg-gray-700"
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(schedule)}
+                                  className="flex-1 h-7 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Empty State */}
+        {filteredSchedules.length === 0 && (
+          <Card className="p-12 text-center dark:bg-gray-800 dark:border-gray-700">
+            <Calendar className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{t.noResults}</h3>
+            <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filters</p>
+          </Card>
+        )}
 
         {/* Add/Edit Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="dark:bg-gray-800 dark:border-gray-700 max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingSchedule ? t.editSchedule : t.addNewSchedule}</DialogTitle>
-              <DialogDescription>
-                {editingSchedule ? 'Update schedule information with conflict detection' : 'Add a new class to the schedule with conflict detection'}
+              <DialogTitle className="dark:text-gray-100">{editingSchedule ? t.editSchedule : t.addNewSchedule}</DialogTitle>
+              <DialogDescription className="dark:text-gray-400">
+                {editingSchedule ? 'Update schedule information' : 'Add a new class to the schedule'}
               </DialogDescription>
             </DialogHeader>
             
-            {/* Time Conflict Alerts (CRITICAL - BLOCKS SAVING) */}
-            {conflictCheck.hasTimeConflicts && (
-              <Alert variant="destructive" className="my-4">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="font-semibold mb-1">{t.conflictsDetected}</div>
-                  <ul className="list-disc list-inside space-y-1">
-                    {conflictCheck.timeConflicts.map((conflict, index) => (
-                      <li key={index} className="text-sm">{conflict}</li>
-                    ))}
-                  </ul>
-                  <div className="mt-2 text-sm font-semibold">{t.cannotSave}</div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Capacity Warning (WARNING - DOESN'T BLOCK SAVING) */}
-            {!conflictCheck.hasTimeConflicts && conflictCheck.hasCapacityWarning && (
-              <Alert className="my-4 border-yellow-500 bg-yellow-50">
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription>
-                  <div className="font-semibold mb-1 text-yellow-800">{t.warningsDetected}</div>
-                  <div className="text-sm text-yellow-700">{conflictCheck.capacityWarning}</div>
-                  <div className="mt-2 text-sm text-yellow-700">{t.canSaveWithWarning}</div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* No Issues */}
-            {!conflictCheck.hasTimeConflicts && !conflictCheck.hasCapacityWarning && formData.day && formData.timeSlot && formData.teacherId && formData.classroomId && formData.groupId && (
-              <Alert className="my-4 border-green-500 bg-green-50">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertDescription>
-                  <div className="text-sm text-green-700">{t.noConflicts}</div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-5 py-4">
+              {/* Subject & Teacher */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="subject">{t.subject}</Label>
+                  <Label htmlFor="subject" className="dark:text-gray-200">{t.subject} *</Label>
                   <Select
                     value={formData.subjectId.toString()}
                     onValueChange={(value) => handleFormChange('subjectId', parseInt(value))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue placeholder={t.selectSubject} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {mockSubjects.map((subject) => (
-                        <SelectItem key={subject.id} value={subject.id.toString()}>
-                          {subject.name}
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={subject.id.toString()} className="dark:text-gray-100 dark:focus:bg-gray-600">
+                          {subject.name} ({subject.code})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="teacher">{t.teacher}</Label>
+                  <Label htmlFor="teacher" className="dark:text-gray-200">{t.teacher} *</Label>
                   <Select
                     value={formData.teacherId.toString()}
                     onValueChange={(value) => handleFormChange('teacherId', parseInt(value))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue placeholder={t.selectTeacher} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {mockTeachers.map((teacher) => (
-                        <SelectItem key={teacher.id} value={teacher.id.toString()}>
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                      {teachers.map((teacher) => (
+                        <SelectItem key={teacher.id} value={teacher.id.toString()} className="dark:text-gray-100 dark:focus:bg-gray-600">
                           {teacher.name}
                         </SelectItem>
                       ))}
@@ -763,38 +826,39 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Group & Classroom */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="group">{t.group}</Label>
+                  <Label htmlFor="group" className="dark:text-gray-200">{t.group} *</Label>
                   <Select
                     value={formData.groupId.toString()}
                     onValueChange={(value) => handleFormChange('groupId', parseInt(value))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue placeholder={t.selectGroup} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {mockGroups.map((group) => (
-                        <SelectItem key={group.id} value={group.id.toString()}>
-                          {group.code} ({group.size} {t.students})
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                      {groups.map((group) => (
+                        <SelectItem key={group.id} value={group.id.toString()} className="dark:text-gray-100 dark:focus:bg-gray-600">
+                          {group.code} ({group.size} students)
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="classroom">{t.classroom}</Label>
+                  <Label htmlFor="classroom" className="dark:text-gray-200">{t.classroom} *</Label>
                   <Select
                     value={formData.classroomId.toString()}
                     onValueChange={(value) => handleFormChange('classroomId', parseInt(value))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue placeholder={t.selectClassroom} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {mockClassrooms.map((classroom) => (
-                        <SelectItem key={classroom.id} value={classroom.id.toString()}>
-                          {classroom.number} ({classroom.capacity} {t.seats})
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                      {classrooms.map((classroom) => (
+                        <SelectItem key={classroom.id} value={classroom.id.toString()} className="dark:text-gray-100 dark:focus:bg-gray-600">
+                          {classroom.number} - {classroom.campus} (Cap: {classroom.capacity})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -802,19 +866,20 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              {/* Day, Time & Week */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="day">{t.day}</Label>
+                  <Label htmlFor="day" className="dark:text-gray-200">{t.day} *</Label>
                   <Select
                     value={formData.day}
                     onValueChange={(value) => handleFormChange('day', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue placeholder={t.selectDay} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
                       {days.map((day) => (
-                        <SelectItem key={day.key} value={day.key}>
+                        <SelectItem key={day.key} value={day.key} className="dark:text-gray-100 dark:focus:bg-gray-600">
                           {day.label}
                         </SelectItem>
                       ))}
@@ -822,17 +887,17 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="time">{t.time}</Label>
+                  <Label htmlFor="time" className="dark:text-gray-200">{t.time} *</Label>
                   <Select
                     value={formData.timeSlot}
                     onValueChange={(value) => handleFormChange('timeSlot', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue placeholder={t.selectTime} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
                       {timeSlots.map((slot) => (
-                        <SelectItem key={slot} value={slot}>
+                        <SelectItem key={slot} value={slot} className="dark:text-gray-100 dark:focus:bg-gray-600">
                           {slot}
                         </SelectItem>
                       ))}
@@ -840,31 +905,66 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="week">{t.week}</Label>
+                  <Label htmlFor="week" className="dark:text-gray-200">{t.week} *</Label>
                   <Select
                     value={formData.week}
-                    onValueChange={(value: Schedule['week']) => handleFormChange('week', value)}
+                    onValueChange={(value) => handleFormChange('week', value)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t.selectWeek} />
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                      <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="numerator">{t.numerator}</SelectItem>
-                      <SelectItem value="denominator">{t.denominator}</SelectItem>
-                      <SelectItem value="both">{t.both}</SelectItem>
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                      <SelectItem value="both" className="dark:text-gray-100 dark:focus:bg-gray-600">{t.both}</SelectItem>
+                      <SelectItem value="numerator" className="dark:text-gray-100 dark:focus:bg-gray-600">{t.numerator}</SelectItem>
+                      <SelectItem value="denominator" className="dark:text-gray-100 dark:focus:bg-gray-600">{t.denominator}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Conflict Alerts */}
+              {conflictCheck.hasTimeConflicts && (
+                <Alert variant="destructive" className="dark:border-red-800 dark:bg-red-900/20">
+                  <AlertTriangle className="w-4 h-4" />
+                  <AlertDescription>
+                    <div className="font-semibold mb-1">{t.conflictsDetected}</div>
+                    <ul className="text-sm space-y-1">
+                      {conflictCheck.timeConflicts.map((conflict, idx) => (
+                        <li key={idx}>• {conflict}</li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {conflictCheck.hasCapacityWarning && !conflictCheck.hasTimeConflicts && (
+                <Alert className="border-yellow-600 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20">
+                  <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                  <AlertDescription className="text-yellow-800 dark:text-yellow-300">
+                    <div className="font-semibold mb-1">{t.warningsDetected}</div>
+                    <div className="text-sm">{conflictCheck.capacityWarning}</div>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {!conflictCheck.hasTimeConflicts && !conflictCheck.hasCapacityWarning && formData.day && formData.timeSlot && (
+                <Alert className="border-green-600 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <AlertDescription className="text-green-800 dark:text-green-300">
+                    {t.noConflicts}
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDialogOpen(false)} className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
                 {t.cancel}
               </Button>
               <Button 
                 onClick={handleSave} 
-                className="bg-[#225b73] hover:bg-[#1a4659]"
-                disabled={conflictCheck.hasTimeConflicts}
+                disabled={conflictCheck.hasTimeConflicts || !formData.subjectId || !formData.teacherId || !formData.classroomId || !formData.groupId || !formData.day || !formData.timeSlot}
+                className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-violet-600 dark:hover:bg-violet-700 disabled:opacity-50"
               >
                 {t.save}
               </Button>
@@ -874,13 +974,13 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className="dark:bg-gray-800 dark:border-gray-700">
             <AlertDialogHeader>
-              <AlertDialogTitle>{t.confirmDelete}</AlertDialogTitle>
-              <AlertDialogDescription>{t.confirmDeleteMessage}</AlertDialogDescription>
+              <AlertDialogTitle className="dark:text-gray-100">{t.confirmDelete}</AlertDialogTitle>
+              <AlertDialogDescription className="dark:text-gray-400">{t.confirmDeleteMessage}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+              <AlertDialogCancel className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">{t.cancel}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteConfirm}
                 className="bg-red-600 hover:bg-red-700"
