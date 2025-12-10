@@ -1,14 +1,3 @@
-/**
- * NoteDialog Component
- * 
- * Modal dialog for adding/editing class notes.
- * Features:
- * - Auto-focus on textarea when opened
- * - Cursor positioned at end of existing text
- * - Displays class context (subject, day, time, classroom)
- * - Save and cancel actions
- */
-
 import { useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
 import { Button } from '../ui/button';

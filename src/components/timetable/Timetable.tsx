@@ -1,21 +1,3 @@
-/**
- * Timetable Component - Main Container with Enhanced Notes
- * 
- * This is the main timetable page with a comprehensive multi-note system.
- * 
- * Features:
- * - View group schedules via dropdown selector
- * - Filter by week type (numerator/denominator)
- * - Filter by day of the week
- * - Create unlimited notes per class with rich editing
- * - Categorize notes (General, Homework, Exam, Important, Reminder, Question)
- * - Pin important notes
- * - Search and filter notes
- * - Persistent storage using localStorage (notes saved between sessions)
- * - Responsive design for all screen sizes
- * - Multi-language support (English, Armenian, Russian)
- */
-
 import { useState, useEffect } from 'react';
 import { Shield } from 'lucide-react';
 import { Badge } from '../ui/badge';

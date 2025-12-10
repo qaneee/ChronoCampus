@@ -1,14 +1,3 @@
-/**
- * EnhancedClassCard Component
- * 
- * Displays class information with enhanced multi-note support:
- * - Shows note count badge
- * - Preview of pinned notes
- * - Quick access to all notes
- * - Quick add button for new notes (always visible)
- * - Category indicators
- */
-
 import { Clock, MapPin, Users, StickyNote, Plus, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';

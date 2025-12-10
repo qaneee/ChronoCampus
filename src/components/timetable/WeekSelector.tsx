@@ -1,10 +1,3 @@
-/**
- * WeekSelector Component
- * 
- * Allows users to toggle between numerator and denominator weeks.
- * This is a common academic scheduling system where classes alternate between weeks.
- */
-
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { WeekType, Translations } from '../../types';
 

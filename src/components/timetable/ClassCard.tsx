@@ -1,16 +1,3 @@
-/**
- * ClassCard Component
- * 
- * Displays information for a single class session including:
- * - Subject name
- * - Time and duration
- * - Classroom location
- * - Lecturer or group (depending on user role)
- * - Week indicator (Numerator/Denominator)
- * - Note indicator if notes exist
- * - Note-taking functionality (for students only)
- */
-
 import { Clock, MapPin, Users, StickyNote, Plus, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
