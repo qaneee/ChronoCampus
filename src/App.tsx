@@ -41,7 +41,7 @@ export default function App() {
     if (!email) return 'User';
     const emailPart = email.split('@')[0];
     
-    // Check if it's a teacher email pattern (e.g., a.smith)
+    // Check if it's a teacher email pattern 
     if (emailPart.includes('.')) {
       const [first, last] = emailPart.split('.');
       const firstName = first.charAt(0).toUpperCase() + first.slice(1);

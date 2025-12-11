@@ -2,9 +2,9 @@ import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { WeekType, Translations } from '../../types';
 
 interface WeekSelectorProps {
-  selectedWeek: 'numerator' | 'denominator';
-  onWeekChange: (week: 'numerator' | 'denominator') => void;
-  translations: Translations;
+  selectedWeek: 'numerator' | 'denominator'; //ayd pahin yntrvats shabat
+  onWeekChange: (week: 'numerator' | 'denominator') => void; //ete user-y poxi shabaty
+  translations: Translations;   // targmanutyunner
 }
 
 export function WeekSelector({ selectedWeek, onWeekChange, translations }: WeekSelectorProps) {

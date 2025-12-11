@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import { Shield } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
@@ -18,9 +18,7 @@ import { mockTimetableData } from '../../constants/mockData';
 import { getUniqueValues } from '../../utils/helpers';
 import { createNote, updateNote } from '../../utils/noteHelpers';
 
-// ============================================================================
 // Component Props
-// ============================================================================
 
 interface TimetableProps {
   userRole: UserRole;
@@ -30,23 +28,16 @@ interface TimetableProps {
   userName?: string;
 }
 
-// ============================================================================
 // LocalStorage Keys
-// ============================================================================
 
 const NOTES_STORAGE_KEY = 'chronocampus_class_notes';
 
-// ============================================================================
 // Main Component
-// ============================================================================
 
 export function Timetable({ userRole, onLogout, language, onLanguageChange, userName }: TimetableProps) {
-  // Get translations for current language
   const t = translations[language];
 
-  // ============================================================================
   // State Management
-  // ============================================================================
 
   // Navigation state
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
@@ -322,10 +313,8 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
     handleEditNote(note);
   };
 
-  // ============================================================================
-  // Render
-  // ============================================================================
-
+ //render
+ 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Header Section */}

@@ -1,9 +1,9 @@
 import { Translations } from '../../types';
 
 interface ViewModeSelectorProps {
-  viewMode: 'my' | 'group';
-  selectedGroup: string;
-  availableGroups: string[];
+  viewMode: 'my' | 'group';       //ogtagortsoxi ditum ` irany te xmbiny
+  selectedGroup: string;          // yntrats xumv
+  availableGroups: string[];       
   onViewModeChange: (mode: 'my' | 'group') => void;
   onGroupChange: (group: string) => void;
   translations: Translations;
