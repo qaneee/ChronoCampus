@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Globe, LogOut, Moon, Sun, Check, ChevronDown, User } from 'lucide-react';
 import { useTheme } from 'next-themes@0.4.6';
 import {
@@ -34,6 +34,25 @@ export function BurgerMenu({ language, onLanguageChange, onLogout, userName, use
   const [showLanguageSubmenu, setShowLanguageSubmenu] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { theme, setTheme } = useTheme();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setShowLanguageSubmenu(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -91,7 +110,7 @@ export function BurgerMenu({ language, onLanguageChange, onLogout, userName, use
       case 'lecturer':
         return 'bg-blue-600 dark:bg-blue-500';
       case 'student':
-        return 'bg-[#225b73] dark:bg-violet-600';
+        return 'bg-green-600 dark:bg-green-500';
       default:
         return 'bg-gray-600 dark:bg-gray-500';
     }
@@ -99,8 +118,19 @@ export function BurgerMenu({ language, onLanguageChange, onLogout, userName, use
 
   return (
     <>
+      {/* Backdrop overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/20 dark:bg-black/40 transition-opacity duration-300"
+          onClick={() => {
+            setIsOpen(false);
+            setShowLanguageSubmenu(false);
+          }}
+        />
+      )}
+
       {/* User Menu Button */}
-      <div className="relative">
+      <div className="relative" ref={menuRef}>
         <button
           onClick={toggleMenu}
           className="flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-200 group touch-manipulation"

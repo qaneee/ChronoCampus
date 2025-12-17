@@ -1,3 +1,15 @@
+/**
+ * EnhancedNoteDialog Component
+ * 
+ * Advanced note editor with rich features:
+ * - Category selection
+ * - Pin/unpin notes
+ * - Character counter
+ * - Tags support
+ * - Auto-save indicator
+ * - Full note metadata display
+ */
+
 import { useEffect, useRef } from 'react';
 import { Pin, PinOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
@@ -78,25 +90,25 @@ export function EnhancedNoteDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         {/* Dialog header with class information */}
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-gray-900 dark:text-gray-100">
             {editingNote ? translations.editingNote : translations.newNote}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-600 dark:text-gray-400">
             {selectedClass.subject} - {selectedClass.time} ({selectedClass.day})
           </DialogDescription>
         </DialogHeader>
 
         {/* Note editor */}
-        <div className="space-y-4 py-4">
+        <div className="space-y-3 py-1">
           {/* Category selector */}
-          <div className="space-y-2">
-            <label className="text-sm text-gray-700">
+          <div className="space-y-1.5">
+            <label className="text-xs text-gray-700 dark:text-gray-300 font-medium">
               {translations.category}
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {(Object.keys(categoryMeta) as NoteCategory[]).map((cat) => {
                 const meta = categoryMeta[cat];
                 const isSelected = noteCategory === cat;
@@ -107,16 +119,17 @@ export function EnhancedNoteDialog({
                     type="button"
                     onClick={() => onCategoryChange(cat)}
                     className={`
-                      px-3 py-2 rounded-lg border-2 transition-all text-sm
-                      flex items-center gap-2 touch-manipulation
+                      px-2 py-1.5 rounded-md border-2 transition-all text-[10px]
+                      flex flex-col items-center justify-center gap-0.5 touch-manipulation 
+                      h-[42px] w-full
                       ${isSelected 
-                        ? `${meta.bgColor} border-current ${meta.color}` 
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                        ? `${meta.bgColor} border-current ${meta.color} shadow-md dark:shadow-lg font-medium` 
+                        : 'bg-white dark:bg-gray-900/50 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                       }
                     `}
                   >
-                    <span className="text-base">{meta.icon}</span>
-                    <span className="truncate">{meta.label}</span>
+                    <span className="text-sm leading-none">{meta.icon}</span>
+                    <span className="text-center leading-tight whitespace-nowrap" lang={language}>{meta.label}</span>
                   </button>
                 );
               })}
@@ -124,12 +137,12 @@ export function EnhancedNoteDialog({
           </div>
 
           {/* Note content */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label htmlFor="note-content" className="text-sm text-gray-700">
+              <label htmlFor="note-content" className="text-xs text-gray-700 dark:text-gray-300 font-medium">
                 {translations.classNotes}
               </label>
-              <span className="text-xs text-gray-500">
+              <span className="text-[10px] text-gray-500 dark:text-gray-400">
                 {charCount} {translations.characterCount}
               </span>
             </div>
@@ -139,7 +152,7 @@ export function EnhancedNoteDialog({
               placeholder={translations.addNotesPlaceholder}
               value={noteContent}
               onChange={(e) => onNoteChange(e.target.value)}
-              className="min-h-[200px] resize-none text-sm"
+              className="min-h-[80px] max-h-[80px] resize-none text-sm bg-white dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500/20 dark:focus:ring-blue-500/20"
             />
           </div>
         </div>
@@ -150,7 +163,7 @@ export function EnhancedNoteDialog({
           <Button
             variant="outline"
             onClick={() => onPinnedChange(!isPinned)}
-            className="w-full sm:w-auto text-sm touch-manipulation flex items-center justify-center gap-1"
+            className="w-full sm:w-auto text-sm touch-manipulation flex items-center justify-center gap-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900/30"
           >
             {isPinned ? (
               <>
@@ -170,25 +183,13 @@ export function EnhancedNoteDialog({
           <Button
             variant="outline"
             onClick={onClose}
-            className="w-full sm:w-auto text-sm touch-manipulation"
+            className="w-full sm:w-auto text-sm touch-manipulation border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900/30"
           >
             {translations.cancel}
           </Button>
           
-          {!isEditing && (
-            <Button
-              style={{ backgroundColor: '#225b73' }}
-              className="text-white w-full sm:w-auto text-sm touch-manipulation"
-              onClick={onSaveAndAddAnother}
-              disabled={!noteContent.trim()}
-            >
-              {translations.saveAndAddAnother}
-            </Button>
-          )}
-          
           <Button
-            style={{ backgroundColor: '#225b73' }}
-            className="text-white w-full sm:w-auto text-sm touch-manipulation"
+            className="text-white w-full sm:w-auto text-sm touch-manipulation bg-[#225b73] hover:bg-[#1a4659] dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-600 dark:hover:from-blue-500 dark:hover:to-blue-500 shadow-md dark:shadow-blue-900/30"
             onClick={onSave}
             disabled={!noteContent.trim()}
           >

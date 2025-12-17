@@ -1,4 +1,22 @@
-import { useState, useEffect } from 'react'; 
+/**
+ * Timetable Component - Main Container with Enhanced Notes
+ * 
+ * This is the main timetable page with a comprehensive multi-note system.
+ * 
+ * Features:
+ * - View group schedules via dropdown selector
+ * - Filter by week type (numerator/denominator)
+ * - Filter by day of the week
+ * - Create unlimited notes per class with rich editing
+ * - Categorize notes (General, Homework, Exam, Important, Reminder, Question)
+ * - Pin important notes
+ * - Search and filter notes
+ * - Persistent storage using localStorage (notes saved between sessions)
+ * - Responsive design for all screen sizes
+ * - Multi-language support (English, Armenian, Russian)
+ */
+
+import { useState, useEffect } from 'react';
 import { Shield } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
@@ -18,7 +36,9 @@ import { mockTimetableData } from '../../constants/mockData';
 import { getUniqueValues } from '../../utils/helpers';
 import { createNote, updateNote } from '../../utils/noteHelpers';
 
+// ============================================================================
 // Component Props
+// ============================================================================
 
 interface TimetableProps {
   userRole: UserRole;
@@ -28,16 +48,23 @@ interface TimetableProps {
   userName?: string;
 }
 
+// ============================================================================
 // LocalStorage Keys
+// ============================================================================
 
 const NOTES_STORAGE_KEY = 'chronocampus_class_notes';
 
+// ============================================================================
 // Main Component
+// ============================================================================
 
 export function Timetable({ userRole, onLogout, language, onLanguageChange, userName }: TimetableProps) {
+  // Get translations for current language
   const t = translations[language];
 
+  // ============================================================================
   // State Management
+  // ============================================================================
 
   // Navigation state
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
@@ -313,10 +340,15 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
     handleEditNote(note);
   };
 
- //render
- 
+  // ============================================================================
+  // Render
+  // ============================================================================
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-gray-950 dark:via-slate-950 dark:to-gray-950 relative overflow-hidden flex flex-col">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
       {/* Header Section */}
       <TimetableHeader 
         userRole={userRole}
@@ -347,15 +379,6 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
             </div>
             
             <div className="flex items-center gap-2">
-              {/* Feedback Button for Students and Lecturers */}
-              {(userRole === 'student' || userRole === 'lecturer') && (
-                <FeedbackDialog
-                  language={language}
-                  userRole={userRole}
-                  userName={userName || (userRole === 'student' ? 'John Doe' : 'Prof. Jane Smith')}
-                />
-              )}
-              
               {/* Admin badge */}
               {userRole === 'admin' && (
                 <Badge className="bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-xs flex-shrink-0">
@@ -454,6 +477,16 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
           onDeleteNote={handleDeleteNote}
           onTogglePin={handleTogglePin}
         />
+
+        {/* Floating Action Button for Feedback (Students and Lecturers only) */}
+        {(userRole === 'student' || userRole === 'lecturer') && (
+          <FeedbackDialog
+            language={language}
+            userRole={userRole}
+            userName={userName || (userRole === 'student' ? 'John Doe' : 'Prof. Jane Smith')}
+            variant="fab"
+          />
+        )}
       </main>
     </div>
   );

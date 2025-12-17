@@ -285,7 +285,7 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
         label: t.problem 
       },
       suggestion: { 
-        className: 'bg-purple-50 text-purple-700 border-purple-200 text-xs dark:bg-purple-950/50 dark:text-purple-400 dark:border-purple-800', 
+        className: 'bg-blue-50 text-blue-700 border-blue-200 text-xs dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800', 
         label: t.suggestion 
       },
       question: { 
@@ -509,7 +509,7 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
 
         {/* Feedback Detail Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[700px] h-[90vh] max-h-[800px] p-0 flex flex-col dark:bg-gray-850 dark:border-gray-700" aria-describedby="feedback-detail-description">
+          <DialogContent className="sm:max-w-[700px] h-[90vh] max-h-[800px] p-0 flex flex-col dark:bg-gray-800 dark:border-gray-700" aria-describedby="feedback-detail-description">
             {selectedFeedback && (
               <>
                 {/* Header */}
@@ -532,12 +532,12 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
                 </DialogHeader>
 
                 {/* Action Bar */}
-                <div className="px-4 sm:px-6 py-3 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700 flex flex-wrap gap-2 flex-shrink-0">
+                <div className="px-4 sm:px-6 py-3 bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-700 flex flex-wrap gap-2 flex-shrink-0">
                   <Select
                     value={selectedFeedback.status}
                     onValueChange={(value: any) => updateFeedbackStatus(selectedFeedback.id, value)}
                   >
-                    <SelectTrigger className="w-full sm:w-[150px] h-9 text-sm dark:bg-gray-850 dark:border-gray-700 dark:text-gray-100">
+                    <SelectTrigger className="w-full sm:w-[150px] h-9 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
@@ -566,7 +566,7 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
                     value={selectedFeedback.priority}
                     onValueChange={(value: any) => updateFeedbackPriority(selectedFeedback.id, value)}
                   >
-                    <SelectTrigger className="w-full sm:w-[130px] h-9 text-sm dark:bg-gray-850 dark:border-gray-700 dark:text-gray-100">
+                    <SelectTrigger className="w-full sm:w-[130px] h-9 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
@@ -584,7 +584,7 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-auto px-4 sm:px-6 dark:bg-gray-900">
+                <div className="flex-1 overflow-auto px-4 sm:px-6 dark:bg-gray-900/50">
                   <div className="py-4 space-y-5">
                     {/* Original Message */}
                     <div>
@@ -592,7 +592,7 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
                         <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{ft.originalMessage}</label>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700">
+                      <div className="bg-gray-50 dark:bg-gray-800/80 p-3 rounded-lg border dark:border-gray-700">
                         <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed">
                           {selectedFeedback.message}
                         </p>
@@ -630,18 +630,18 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
 
                       <div className="space-y-3">
                         {selectedFeedback.comments.length === 0 ? (
-                          <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed dark:border-gray-700">
+                          <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed dark:border-gray-700">
                             <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
                             <p className="text-sm text-gray-500 dark:text-gray-400">{ft.noComments}</p>
                           </div>
                         ) : (
                           selectedFeedback.comments.map((comment) => (
                             <div key={comment.id} className="flex gap-2">
-                              <div className="w-7 h-7 rounded-full bg-[#225b73] dark:bg-[#2d7a98] flex items-center justify-center text-white flex-shrink-0">
+                              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-600 to-purple-700 dark:from-violet-600 dark:to-purple-700 flex items-center justify-center text-white flex-shrink-0">
                                 <User className="h-3.5 w-3.5" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border dark:border-gray-700">
+                                <div className="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-3 border dark:border-gray-700">
                                   <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                                     <span className="text-xs font-medium dark:text-gray-200">{comment.user}</span>
                                     <Badge variant="secondary" className="text-xs h-4 px-1.5 dark:bg-gray-700 dark:text-gray-300">
@@ -664,13 +664,13 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
                 </div>
 
                 {/* Comment Input */}
-                <div className="border-t dark:border-gray-700 p-4 sm:px-6 bg-white dark:bg-gray-850 flex-shrink-0">
+                <div className="border-t dark:border-gray-700 p-4 sm:px-6 bg-white dark:bg-gray-800 flex-shrink-0">
                   <div className="flex gap-2">
                     <Textarea
                       placeholder={ft.writeComment}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      className="min-h-[70px] max-h-[120px] resize-none flex-1 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
+                      className="min-h-[70px] max-h-[120px] resize-none flex-1 text-sm dark:bg-gray-900/50 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                           addComment();
@@ -680,7 +680,7 @@ export function FeedbackManagement({ language }: FeedbackManagementProps) {
                     <Button
                       onClick={addComment}
                       disabled={!newComment.trim()}
-                      className="self-end h-9"
+                      className="self-end h-9 bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 dark:from-violet-600 dark:to-purple-700 dark:hover:from-violet-700 dark:hover:to-purple-800"
                       size="sm"
                     >
                       <Send className="h-3.5 w-3.5 sm:mr-2" />

@@ -3,8 +3,8 @@
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog@1.1.6";
 
-import { cn } from "./utils"; //classNames merge function → Tailwind դասերը միացնելու համար
-import { buttonVariants } from "./button"; // get buttom style
+import { cn } from "./utils";
+import { buttonVariants } from "./button";
 
 function AlertDialog({
   ...props

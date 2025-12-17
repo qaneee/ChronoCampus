@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Users, BookOpen, UsersRound, MapPin, MessageSquare, BarChart3, Calendar, ArrowLeft } from 'lucide-react';
+import { Users, BookOpen, UsersRound, MapPin, MessageSquare, BarChart3, ArrowLeft, GraduationCap } from 'lucide-react';
+import { Button } from '../ui/button';
 import { BurgerMenu } from '../BurgerMenu';
 import { UserManagement } from './UserManagement';
 import { SubjectsManagement } from './SubjectsManagement';
 import { GroupsManagement } from './GroupsManagement';
 import { PlaceManagement } from './PlaceManagement';
 import { FeedbackManagement } from './FeedbackManagement';
-import { SemesterManagement } from './SemesterManagement';
 
 const translations = {
   en: {
@@ -28,11 +28,16 @@ const translations = {
     logoutConfirmTitle: 'Confirm Logout',
     logoutConfirmMessage: 'Are you sure you want to log out?',
     cancel: 'Cancel',
-    confirmLogout: 'Yes, Logout'
+    confirmLogout: 'Yes, Logout',
+    usersDesc: 'Manage students, teachers, and administrators',
+    subjectsDesc: 'Add and manage subjects and assign teachers',
+    groupsDesc: 'Manage student groups and classrooms',
+    placeDesc: 'Create and edit class schedules and places',
+    feedbackDesc: 'Manage user feedback and suggestions'
   },
   hy: {
     adminPanel: 'Ադմինի Վահանակ',
-    dashboard: 'Վահանակ',
+    dashboard: 'Վահանկ',
     userManagement: 'Օգտատերերի Կառավարում',
     subjects: 'Առարկաներ',
     semesters: 'Կիսամյակներ',
@@ -49,7 +54,12 @@ const translations = {
     logoutConfirmTitle: 'Հաստատել Ելքը',
     logoutConfirmMessage: 'Համոզվա՞ծ եք, որ ուզում եք դուրս գալ:',
     cancel: 'Չեղարկել',
-    confirmLogout: 'Այո, Դուրս Գալ'
+    confirmLogout: 'Այո, Դուրս Գալ',
+    usersDesc: 'Կառավարել ուսանողներին, ուսուցիչներին և ադմինիստրատորներին',
+    subjectsDesc: 'Ավելացնել և կառավարել առարկաները և նշանակել ուսուցիչներ',
+    groupsDesc: 'Կառավարել ուսանողական խմբերը և լսարանները',
+    placeDesc: 'Ստեղծել և խմբագրել դասացուցակը և տեղանքը',
+    feedbackDesc: 'Կառավարել օգտատերերի կարծիքները և առաջարկությունները'
   },
   ru: {
     adminPanel: 'Панель Администратора',
@@ -70,7 +80,12 @@ const translations = {
     logoutConfirmTitle: 'Подтверждение Выхода',
     logoutConfirmMessage: 'Вы уверены, что хотите выйти?',
     cancel: 'Отмена',
-    confirmLogout: 'Да, Выйти'
+    confirmLogout: 'Да, Выйти',
+    usersDesc: 'Управляйте студентами, преподавателями и администраторами',
+    subjectsDesc: 'Добавляйте и управляйте предметами и назначайте преподавателей',
+    groupsDesc: 'Управляйте студенческими группами и аудиториями',
+    placeDesc: 'Создавайте и редактируйте расписание занятий и места',
+    feedbackDesc: 'Управляйте отзывами и предложениями пользователей'
   }
 };
 
@@ -88,73 +103,77 @@ export function AdminDashboard({ onLogout, language, onLanguageChange, userName 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
 
   const menuItems = [
-    { id: 'dashboard' as const, label: t.dashboard, icon: BarChart3 },
-    { id: 'users' as const, label: t.userManagement, icon: Users },
-    { id: 'subjects' as const, label: t.subjects, icon: BookOpen },
-    { id: 'groups' as const, label: t.groupsClassrooms, icon: UsersRound },
-    { id: 'place' as const, label: t.placeManagement, icon: MapPin },
-    { id: 'feedback' as const, label: t.feedbackManagement, icon: MessageSquare }
+    { id: 'dashboard' as const, label: t.dashboard, icon: BarChart3, desc: '' },
+    { id: 'users' as const, label: t.userManagement, icon: Users, desc: t.usersDesc },
+    { id: 'subjects' as const, label: t.subjects, icon: BookOpen, desc: t.subjectsDesc },
+    { id: 'groups' as const, label: t.groupsClassrooms, icon: UsersRound, desc: t.groupsDesc },
+    { id: 'place' as const, label: t.placeManagement, icon: MapPin, desc: t.placeDesc },
+    { id: 'feedback' as const, label: t.feedbackManagement, icon: MessageSquare, desc: t.feedbackDesc }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto w-full">
-        {/* Top Header Bar */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 sticky top-0 z-20">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 lg:hidden">
-              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#225b73] dark:bg-gradient-to-br dark:from-violet-600 dark:to-purple-700 flex items-center justify-center flex-shrink-0">
-                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-[#225b73] dark:text-violet-300 text-sm sm:text-base truncate">{t.adminPanel}</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">ChronoCampus</p>
-                </div>
-              </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-gray-950 dark:via-slate-950 dark:to-gray-950 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
+      {/* Top Header Bar */}
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-gray-800/60 px-4 sm:px-6 lg:px-8 py-4 sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center shadow-lg">
+              <GraduationCap className="w-6 h-6 text-white" />
             </div>
-            <div className="hidden lg:block min-w-0 flex-1">
-              <h2 className="text-[#225b73] dark:text-violet-300 text-base lg:text-lg truncate">{t.adminPanel}</h2>
-            </div>
-            <div className="flex items-center space-x-2">
-              <BurgerMenu
-                language={language}
-                onLanguageChange={onLanguageChange}
-                onLogout={onLogout}
-                userName={userName}
-                userRole="admin"
-                translations={t}
-              />
+            <div>
+              <h2 className="text-gray-900 dark:text-gray-100 font-semibold tracking-tight">
+                {t.adminPanel}
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">ChronoCampus</p>
             </div>
           </div>
+          <BurgerMenu
+            language={language}
+            onLanguageChange={onLanguageChange}
+            onLogout={onLogout}
+            userName={userName}
+            userRole="admin"
+            translations={t}
+          />
         </div>
+      </div>
 
+      {/* Main Content */}
+      <main className="relative z-10">
         {activeTab === 'dashboard' && (
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="mb-1 sm:mb-2 text-xl sm:text-2xl md:text-3xl dark:text-gray-100">{t.welcome}</h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 md:mb-8 text-sm sm:text-base">{t.manageUniversity}</p>
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              {/* Welcome Section */}
+              <div className="mb-8">
+                <h1 className="text-[28px] font-semibold text-gray-900 dark:text-gray-100 mb-2.5 tracking-tight">
+                  {t.welcome}
+                </h1>
+                <p className="text-[15px] text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {t.manageUniversity}
+                </p>
+              </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+              {/* Menu Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {menuItems.slice(1).map((item) => {
                   const Icon = item.icon;
                   return (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className="bg-white dark:bg-gray-800 p-4 sm:p-5 md:p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow text-left group touch-manipulation"
+                      className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl p-6 rounded-2xl border border-gray-200/60 dark:border-gray-800/60 hover:shadow-[0_12px_48px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_12px_48px_rgba(0,0,0,0.5)] transition-all duration-300 text-left group hover:scale-[1.02]"
                     >
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-[#225b73]/10 dark:bg-violet-500/20 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-[#225b73] dark:group-hover:bg-gradient-to-br dark:group-hover:from-violet-600 dark:group-hover:to-purple-700 transition-colors">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[#225b73] dark:text-violet-300 group-hover:text-white transition-colors" />
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700/10 to-slate-900/10 dark:from-slate-700/20 dark:to-slate-900/20 flex items-center justify-center mb-4 group-hover:from-slate-700 group-hover:to-slate-900 dark:group-hover:from-slate-700 dark:group-hover:to-slate-900 transition-all duration-300">
+                        <Icon className="w-6 h-6 text-slate-700 dark:text-slate-300 group-hover:text-white transition-colors duration-300" />
                       </div>
-                      <h3 className="mb-1 sm:mb-2 text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">{item.label}</h3>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                        {item.id === 'users' && 'Manage students, teachers, and administrators'}
-                        {item.id === 'subjects' && 'Add and manage subjects and assign teachers'}
-                        {item.id === 'groups' && 'Manage student groups and classrooms'}
-                        {item.id === 'place' && 'Create and edit class schedules and places'}
-                        {item.id === 'feedback' && 'Manage user feedback and suggestions'}
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        {item.label}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        {item.desc}
                       </p>
                     </button>
                   );
@@ -163,77 +182,82 @@ export function AdminDashboard({ onLogout, language, onLanguageChange, userName 
             </div>
           </div>
         )}
+
         {activeTab === 'users' && (
           <div>
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
-              <button
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-gray-800/60 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
+              <Button
                 onClick={() => setActiveTab('dashboard')}
                 variant="outline"
-                className="flex items-center space-x-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-violet-300"
+                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 transition-all duration-300"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{t.backToDashboard}</span>
-              </button>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.backToDashboard}
+              </Button>
             </div>
             <UserManagement language={language} />
           </div>
         )}
+
         {activeTab === 'subjects' && (
           <div>
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
-              <button
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-gray-800/60 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
+              <Button
                 onClick={() => setActiveTab('dashboard')}
                 variant="outline"
-                className="flex items-center space-x-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-violet-300"
+                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 transition-all duration-300"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{t.backToDashboard}</span>
-              </button>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.backToDashboard}
+              </Button>
             </div>
             <SubjectsManagement language={language} />
           </div>
         )}
+
         {activeTab === 'groups' && (
           <div>
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
-              <button
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-gray-800/60 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
+              <Button
                 onClick={() => setActiveTab('dashboard')}
                 variant="outline"
-                className="flex items-center space-x-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-violet-300"
+                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 transition-all duration-300"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{t.backToDashboard}</span>
-              </button>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.backToDashboard}
+              </Button>
             </div>
             <GroupsManagement language={language} />
           </div>
         )}
+
         {activeTab === 'place' && (
           <div>
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
-              <button
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-gray-800/60 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
+              <Button
                 onClick={() => setActiveTab('dashboard')}
                 variant="outline"
-                className="flex items-center space-x-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-violet-300"
+                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 transition-all duration-300"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{t.backToDashboard}</span>
-              </button>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.backToDashboard}
+              </Button>
             </div>
             <PlaceManagement language={language} />
           </div>
         )}
+
         {activeTab === 'feedback' && (
           <div>
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
-              <button
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-gray-800/60 px-4 sm:px-6 lg:px-8 py-4 shadow-sm">
+              <Button
                 onClick={() => setActiveTab('dashboard')}
                 variant="outline"
-                className="flex items-center space-x-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-violet-300"
+                className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 transition-all duration-300"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{t.backToDashboard}</span>
-              </button>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t.backToDashboard}
+              </Button>
             </div>
             <FeedbackManagement language={language} />
           </div>

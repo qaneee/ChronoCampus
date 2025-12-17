@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from './ui/button';
 import { Globe } from 'lucide-react';
 
 type Language = 'en' | 'hy' | 'ru';
@@ -9,10 +10,22 @@ interface LanguageSelectorProps {
   className?: string;
 }
 
-const languageLabels = {
-  en: { short: 'EN', full: 'English' },
-  hy: { short: 'ՀԱՅ', full: 'Հայերեն' },
-  ru: { short: 'РУ', full: 'Русский' }
+const languageData = {
+  en: { 
+    name: 'English',
+    code: 'EN',
+    flagUrl: 'https://flagcdn.com/w40/gb.png'
+  },
+  hy: { 
+    name: 'Հայերեն',
+    code: 'ՀԱ',
+    flagUrl: 'https://flagcdn.com/w40/am.png'
+  },
+  ru: { 
+    name: 'Русский',
+    code: 'РУ',
+    flagUrl: 'https://flagcdn.com/w40/ru.png'
+  }
 };
 
 export function LanguageSelector({ language, onLanguageChange, className }: LanguageSelectorProps) {
@@ -20,13 +33,16 @@ export function LanguageSelector({ language, onLanguageChange, className }: Lang
 
   return (
     <div className={`${className}`}>
-      <div className="relative group">
-        <button
+      <div className="relative">
+        {/* Current Language Button - Matching theme toggle style */}
+        <Button
           onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-          className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full shadow-md border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200 ease-out"
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 hover:scale-110 hover:shadow-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-700"
         >
-          <Globe className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#225b73] dark:text-violet-400" />
-        </button>
+          <Globe className="w-[18px] h-[18px] text-slate-700 dark:text-gray-400 transition-transform duration-300" />
+        </Button>
 
         {/* Dropdown Menu */}
         {showLanguageMenu && (
@@ -37,27 +53,27 @@ export function LanguageSelector({ language, onLanguageChange, className }: Lang
               onClick={() => setShowLanguageMenu(false)}
             />
             
-            <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 mt-2 w-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="p-1.5">
-                {(Object.keys(languageLabels) as Language[]).map((lang, index) => (
+                {(Object.keys(languageData) as Language[]).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => {
                       onLanguageChange(lang);
                       setShowLanguageMenu(false);
                     }}
-                    className={`w-full flex items-center justify-center px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 ${
                       language === lang
-                        ? 'bg-gradient-to-r from-[#225b73] to-[#2a6d87] dark:from-violet-600 dark:to-purple-600 text-white shadow-sm'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
-                    } ${index !== 0 ? 'mt-0.5' : ''}`}
+                        ? 'bg-gradient-to-r from-[#225b73] to-[#2a6d87] dark:from-blue-600 dark:to-blue-700 shadow-sm text-white'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800/60 text-gray-700 dark:text-gray-300'
+                    }`}
                   >
-                    <span className="font-medium">{languageLabels[lang].full}</span>
-                    {language === lang && (
-                      <svg className="w-3.5 h-3.5 ml-1.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
+                    <img 
+                      src={languageData[lang].flagUrl} 
+                      alt={languageData[lang].name} 
+                      className="w-6 h-6 object-cover rounded-sm shadow-sm flex-shrink-0" 
+                    />
+                    <span className="text-sm font-medium">{languageData[lang].name}</span>
                   </button>
                 ))}
               </div>

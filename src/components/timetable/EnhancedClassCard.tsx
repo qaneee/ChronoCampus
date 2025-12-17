@@ -1,3 +1,14 @@
+/**
+ * EnhancedClassCard Component
+ * 
+ * Displays class information with enhanced multi-note support:
+ * - Shows note count badge
+ * - Preview of pinned notes
+ * - Quick access to all notes
+ * - Quick add button for new notes (always visible)
+ * - Category indicators
+ */
+
 import { Clock, MapPin, Users, StickyNote, Plus, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -30,7 +41,7 @@ export function EnhancedClassCard({
   const hasNotes = notes.length > 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow overflow-hidden dark:bg-gray-800/50 dark:border-gray-700">
+    <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-gray-200/60 dark:border-gray-800/60 hover:shadow-[0_12px_48px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_12px_48px_rgba(0,0,0,0.5)] transition-all duration-300 overflow-hidden">
       {/* Card Header: Subject, Groups, Duration */}
       <CardHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3">
         <div className="flex items-start justify-between gap-2">

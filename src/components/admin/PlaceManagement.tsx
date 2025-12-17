@@ -116,7 +116,7 @@ const translations = {
     wednesday: 'Չորեքշաբթի',
     thursday: 'Հինգշաբթի',
     friday: 'Ուրբաթ',
-    numerator: 'Շաբաթ 1 (Թվիչ)',
+    numerator: 'Շաբաթ 1 (Համարիչ)',
     denominator: 'Շաբաթ 2 (Հայտարար)',
     both: 'Երկու Շաբաթներ',
     conflictsDetected: 'Հայտնաբերված են Հակասություններ',
@@ -546,7 +546,7 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <Badge variant="outline" className="text-[#225b73] dark:text-violet-400 border-[#225b73] dark:border-violet-400">
+                            <Badge variant="outline" className="text-[#225b73] dark:text-blue-400 border-[#225b73] dark:border-blue-400">
                               {schedule.groupCode}
                             </Badge>
                           </td>
@@ -706,7 +706,7 @@ export function PlaceManagement({ language }: PlaceManagementProps) {
                   <Card key={day.key} className="dark:bg-gray-800 dark:border-gray-700">
                     <div className="p-4 sm:p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                        <Calendar className="w-5 h-5 mr-2 text-[#225b73] dark:text-violet-400" />
+                        <Calendar className="w-5 h-5 mr-2 text-[#225b73] dark:text-blue-400" />
                         {day.label}
                         <Badge variant="secondary" className="ml-2 dark:bg-gray-700 dark:text-gray-200">
                           {daySchedules.length}

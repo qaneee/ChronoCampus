@@ -95,11 +95,18 @@ export interface Translations {
   adminAccess: string;
   numerator: string;
   denominator: string;
+  numeratorShort: string;
+  denominatorShort: string;
   monday: string;
   tuesday: string;
   wednesday: string;
   thursday: string;
   friday: string;
+  mondayShort: string;
+  tuesdayShort: string;
+  wednesdayShort: string;
+  thursdayShort: string;
+  fridayShort: string;
   time: string;
   classroom: string;
   lecturer: string;

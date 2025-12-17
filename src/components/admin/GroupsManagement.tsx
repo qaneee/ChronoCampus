@@ -290,7 +290,7 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                   className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 />
               </div>
-              <Button onClick={handleAddGroup} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-violet-600 dark:hover:bg-violet-700">
+              <Button onClick={handleAddGroup} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-blue-600 dark:hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
                 {t.addGroup}
               </Button>
@@ -326,8 +326,8 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center mr-3">
-                              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                            <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mr-3">
+                              <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div className="text-gray-900 dark:text-gray-100">{group.name}</div>
                           </div>

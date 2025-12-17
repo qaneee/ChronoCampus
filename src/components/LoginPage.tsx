@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Clock, Eye, EyeOff, Shield, Moon, Sun } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, Moon, Sun, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { PrivacyPolicy } from './PrivacyPolicy';
 import { TermsOfService } from './TermsOfService';
 import { LanguageSelector } from './LanguageSelector';
+import { ChangePasswordDialog } from './ChangePasswordDialog';
 import { useTheme } from 'next-themes@0.4.6';
+import { toast } from 'sonner';
 
 interface LoginPageProps {
   onLogin: (isAdmin: boolean, email: string) => void;
   onForgotPassword: () => void;
-  onSignUp: () => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
 }
@@ -20,226 +21,473 @@ type Language = 'en' | 'hy' | 'ru';
 const translations = {
   en: {
     title: 'ChronoCampus',
-    emailLabel: 'Email Address',
-    passwordLabel: 'Password',
-    forgotPassword: 'Forgot password?',
-    login: 'Log in',
+    subtitle: 'National Polytechnic University of Armenia',
+    microsoftButton: 'Sign in with Microsoft',
+    microsoftSubtext: 'University Email',
     or: 'or',
-    loginAsAdmin: 'Login as Administrator',
+    secondaryAccessToggle: 'Administrator or no university email? Sign in here',
+    emailPlaceholder: 'Enter your email',
+    passwordPlaceholder: 'Enter your password',
+    forgotPassword: 'Forgot password?',
+    signIn: 'Sign In',
+    signingIn: 'Signing in...',
+    authenticating: 'Authenticating with Microsoft...',
     privacyPolicy: 'Privacy Policy',
     termsOfService: 'Terms of Service',
-    emailError: 'Please use a valid @polytechnic.am email address',
-    passwordError: 'Password must be more than 8 characters',
-    noAccount: "Do not have an account yet?",
-    signUp: "Sign up"
+    emailError: 'Please enter a valid email address',
+    passwordError: 'Password must be at least 8 characters',
+    loginError: 'Invalid email or password',
+    accountNotActivated: 'Your account is not yet activated. Please contact the academic office.',
+    accountNotFound: 'No account found with this email. Please contact the academic office.',
+    microsoftError: 'Microsoft authentication failed. Please try again.',
+    loginSuccess: 'Login successful',
+    welcomeBack: 'Welcome back',
+    and: 'and'
   },
   hy: {
     title: 'ChronoCampus',
-    emailLabel: 'Էլեկտրոնային Հասցե',
-    passwordLabel: 'Գաղտնաբառ',
-    forgotPassword: 'Մոռացե՞լ եք գաղտնաբառը',
-    login: 'Մուտք',
+    subtitle: 'Հայաստանի Ազգային Պոլիտեխնիկական Համալսարան',
+    microsoftButton: 'Մուտք Microsoft-ով',
+    microsoftSubtext: 'Համալսարանական Էլ․ Հասցե',
     or: 'կամ',
-    loginAsAdmin: 'Մուտք որպես Ադմինիստրատոր',
+    secondaryAccessToggle: 'Ադմինիստրատո՞ր եք կամ չունե՞ք համալսարանական էլ․ հասցե։ Մուտք գործեք այստեղ',
+    emailPlaceholder: 'Մուտքագրեք ձեր էլ․ հասցեն',
+    passwordPlaceholder: 'Մուտքագրեք ձեր գաղտնաբառը',
+    forgotPassword: 'Մոռացե՞լ եք գաղտնաբառը',
+    signIn: 'Մուտք',
+    signingIn: 'Մուտք գործում...',
+    authenticating: 'Նույնականացում Microsoft-ի միջոցով...',
     privacyPolicy: 'Գաղտնիության Քաղաքականություն',
     termsOfService: 'Օգտագործման Պայմաններ',
-    emailError: 'Խնդրում ենք օգտագործել վավեր @polytechnic.am էլեկտրոնային հասցե',
-    passwordError: 'Գաղտնաբառը պետք է լինի 8 նիշից ավել',
-    noAccount: "Դեռ չունե՞ք հաշիվ",
-    signUp: "Գրանցվել"
+    emailError: 'Խնդրում ենք մուտքագրել վավեր էլ․ հասցե',
+    passwordError: 'Գաղտնաբառը պետք է լինի առնվազն 8 նիշ',
+    loginError: 'Անվավեր էլ․ հասցե կամ գաղտնաբառ',
+    accountNotActivated: 'Ձեր հաշիվը դեռ ակտիվացված չէ։ Խնդրում ենք կապվել ակադեմիական գրասենյակի հետ։',
+    accountNotFound: 'Այս էլ․ հասցեով հաշիվ չի գտնվել։ Խնդրում ենք կապվել ակադեմիական գրասենյակի հետ։',
+    microsoftError: 'Microsoft նույնականացումը ձախողվեց։ Խնդրում ենք կրկին փորձել։',
+    loginSuccess: 'Մուտքը հաջող է',
+    welcomeBack: 'Բարի վերադարձ',
+    and: 'և'
   },
   ru: {
     title: 'ChronoCampus',
-    emailLabel: 'Адрес Электронной Почты',
-    passwordLabel: 'Пароль',
-    forgotPassword: 'Забыли пароль?',
-    login: 'Войти',
+    subtitle: 'Национальный Политехнический Университет Армении',
+    microsoftButton: 'Войти через Microsoft',
+    microsoftSubtext: 'Университетский Email',
     or: 'или',
-    loginAsAdmin: 'Войти как Администратор',
+    secondaryAccessToggle: 'Администратор или нет университетского email? Войдите здесь',
+    emailPlaceholder: 'Введите ваш email',
+    passwordPlaceholder: 'Введите ваш пароль',
+    forgotPassword: 'Забыли пароль?',
+    signIn: 'Войти',
+    signingIn: 'Вход...',
+    authenticating: 'Аутентификация через Microsoft...',
     privacyPolicy: 'Политика Конфиденциальности',
     termsOfService: 'Условия Использования',
-    emailError: 'Пожалуйста, используйте действующий адрес @polytechnic.am',
-    passwordError: 'Пароль должен быть более 8 символов',
-    noAccount: 'Еще нет аккаунта?',
-    signUp: 'Зарегистрироваться'
+    emailError: 'Пожалуйста, введите действительный email адрес',
+    passwordError: 'Пароль должен содержать не менее 8 символов',
+    loginError: 'Неверный email или пароль',
+    accountNotActivated: 'Ваш аккаунт еще не активирован. Пожалуйста, свяжитесь с учебным офисом.',
+    accountNotFound: 'Аккаунт с этим email не найден. Пожалуйста, свяжитесь с учебным офисом.',
+    microsoftError: 'Ошибка аутентификации Microsoft. Пожалуйста, попробуйте снова.',
+    loginSuccess: 'Вход выполнен успешно',
+    welcomeBack: 'С возвращением',
+    and: 'и'
   }
 };
 
-export function LoginPage({ onLogin, onForgotPassword, onSignUp, language, onLanguageChange }: LoginPageProps) {
+// Mock function to check if admin needs password change
+const checkAdminFirstLogin = (email: string): boolean => {
+  const adminFirstLoginKey = `admin_first_login_${email}`;
+  const hasChangedPassword = localStorage.getItem(adminFirstLoginKey);
+  return hasChangedPassword !== 'true';
+};
+
+// Microsoft Icon Component
+const MicrosoftIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="11" height="11" fill="#F25022"/>
+    <rect x="12" width="11" height="11" fill="#7FBA00"/>
+    <rect y="12" width="11" height="11" fill="#00A4EF"/>
+    <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
+  </svg>
+);
+
+export function LoginPage({ onLogin, onForgotPassword, language, onLanguageChange }: LoginPageProps) {
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMicrosoftLoading, setIsMicrosoftLoading] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [pendingAdminEmail, setPendingAdminEmail] = useState('');
 
   const t = translations[language];
+  const { theme, setTheme } = useTheme();
 
-  const handleSubmit = (e: React.FormEvent, isAdmin: boolean = false) => {
+  // Email validation
+  const isEmailValid = email.includes('@') && email.length > 3;
+  const showEmailError = emailTouched && !isEmailValid && email.length > 0;
+
+  // Password validation
+  const isPasswordValid = password.length >= 8;
+  const showPasswordError = passwordTouched && !isPasswordValid && password.length > 0;
+
+  // Handle Microsoft OAuth Login
+  const handleMicrosoftLogin = async () => {
+    setError('');
+    setIsMicrosoftLoading(true);
+
+    // Simulate Microsoft OAuth flow
+    setTimeout(() => {
+      try {
+        // Mock Microsoft authentication
+        // In real app, this would redirect to Microsoft OAuth endpoint
+        
+        // Simulate successful authentication
+        const mockMicrosoftEmail = 'johnsmith.tt319@polytechnic.am'; // Mock email from Microsoft
+        
+        // Simulate database lookup - check if account exists and is activated
+        const accountExists = Math.random() > 0.1; // 90% chance account exists
+        const isActivated = Math.random() > 0.2; // 80% chance account is activated
+
+        if (!accountExists) {
+          // Account not found in database
+          setError(t.accountNotFound);
+          setIsMicrosoftLoading(false);
+          return;
+        }
+
+        if (!isActivated) {
+          // Account exists but not activated yet
+          setError(t.accountNotActivated);
+          setIsMicrosoftLoading(false);
+          return;
+        }
+
+        // Success - role will be determined by server based on database records
+        // Mock response from server with role information
+        const mockUserRole = Math.random() > 0.5 ? 'student' : 'lecturer'; // Server determines role
+        const isAdmin = false; // Microsoft OAuth users are never admins
+
+        toast.success(`${t.welcomeBack}!`);
+        onLogin(isAdmin, mockMicrosoftEmail);
+      } catch (err) {
+        setError(t.microsoftError);
+        setIsMicrosoftLoading(false);
+      }
+    }, 2000);
+  };
+
+  // Handle Email/Password Login (for exceptional access and administrators)
+  const handleEmailPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validate email domain
-    if (!email.endsWith('@polytechnic.am')) {
+    // Mark fields as touched
+    setEmailTouched(true);
+    setPasswordTouched(true);
+
+    // Validate email format
+    if (!isEmailValid) {
       setError(t.emailError);
       return;
     }
 
     // Validate password length
-    if (password.length <= 8) {
+    if (!isPasswordValid) {
       setError(t.passwordError);
       return;
     }
 
-    if (email && password) {
-      onLogin(isAdmin, email);
-    }
+    setIsLoading(true);
+
+    // Simulate API call - server determines if user exists, role, and validates password
+    setTimeout(() => {
+      try {
+        // Mock authentication
+        const mockValidPassword = 'password123';
+        
+        if (password === mockValidPassword) {
+          // Simulate database lookup - server returns user role
+          // Role is NOT determined by email pattern, but by database records
+          const mockUserData = {
+            email: email,
+            role: email.includes('admin') ? 'admin' : 'student', // Server determines this
+            isFirstLogin: Math.random() > 0.5
+          };
+
+          const isAdmin = mockUserData.role === 'admin';
+          
+          // Check if user needs to change password on first login (applies to ALL email/password users)
+          if (mockUserData.isFirstLogin) {
+            setPendingAdminEmail(email);
+            setShowPasswordChange(true);
+            setIsLoading(false);
+            return;
+          }
+          
+          // Success
+          toast.success(`${t.welcomeBack}!`);
+          onLogin(isAdmin, email);
+        } else {
+          setError(t.loginError);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        setError(t.loginError);
+        setIsLoading(false);
+      }
+    }, 1500);
   };
 
-  const { theme, setTheme } = useTheme();
+  const handlePasswordChangeComplete = () => {
+    setShowPasswordChange(false);
+    localStorage.setItem(`user_first_login_${pendingAdminEmail}`, 'true');
+    toast.success(t.loginSuccess);
+    
+    // Determine if admin based on stored email pattern (in real app, this comes from server)
+    const isAdmin = pendingAdminEmail.includes('admin');
+    onLogin(isAdmin, pendingAdminEmail);
+  };
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-gray-950 dark:via-slate-950 dark:to-gray-950 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
       {/* Top Right Controls */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 flex items-center gap-2">
-        {/* Dark Mode Toggle */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 flex items-center gap-3">
         <Button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           variant="outline"
           size="icon"
-          className="h-9 w-9 sm:h-10 sm:w-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 hover:scale-105 transition-all duration-200"
+          className="h-9 w-9 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-900 hover:scale-110 hover:shadow-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-700"
         >
-          {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-[#225b73] dark:text-amber-400" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-[#225b73]" />}
+          {theme === 'dark' ? 
+            <Sun className="w-[18px] h-[18px] text-amber-500 transition-transform duration-700" /> : 
+            <Moon className="w-[18px] h-[18px] text-slate-700 transition-transform duration-300" />
+          }
         </Button>
-        {/* Language Selector */}
-        <LanguageSelector language={language} onLanguageChange={onLanguageChange} className="!relative !top-0 !right-0" />
+        <LanguageSelector 
+          language={language} 
+          onLanguageChange={onLanguageChange} 
+          className="!relative !top-0 !right-0" 
+        />
       </div>
 
-      <div className="w-full max-w-md px-2 sm:px-0">
-        {/* Login Form */}
-        <div className="bg-white dark:bg-gray-800/90 rounded-xl shadow-xl dark:shadow-2xl dark:shadow-black/20 border border-gray-100 dark:border-gray-700/50 p-4 sm:p-6 md:p-8 lg:p-10">
-          {/* Logo and Title */}
-          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#225b73] dark:bg-gradient-to-br dark:from-violet-600 dark:to-purple-700 flex items-center justify-center flex-shrink-0 shadow-lg dark:shadow-violet-900/50">
-              <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+      {/* Login Card */}
+      <div className="w-full max-w-[460px] relative z-10">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-gray-200/60 dark:border-gray-800/60 overflow-hidden transition-all duration-500 hover:shadow-[0_12px_48px_rgba(0,0,0,0.16)] dark:hover:shadow-[0_12px_48px_rgba(0,0,0,0.5)]">
+          {/* Header */}
+          <div className="px-6 sm:px-8 pt-6 pb-5 text-center border-b border-gray-100/80 dark:border-gray-800/80 flex flex-col items-center justify-center">
+            <div className="flex justify-center mb-3">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-500 group">
+                <GraduationCap className="w-8 h-8 text-white group-hover:scale-110 transition-transform duration-500" />
+              </div>
             </div>
-            <h1 className="text-[#225b73] dark:text-violet-300 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">{t.title}</h1>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1.5 tracking-tight">
+              {t.title}
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-[320px] mx-auto min-h-[40px] flex items-center justify-center">
+              {t.subtitle}
+            </p>
           </div>
-          
-          <form onSubmit={(e) => handleSubmit(e)} className="space-y-3 sm:space-y-4">
-            <div>
-              <Input
-                id="email"
-                type="email"
-                placeholder={t.emailLabel}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-input-background dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500 h-11 sm:h-12 text-sm sm:text-base dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
-              />
-            </div>
 
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder={t.passwordLabel}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-input-background dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500 pr-10 h-11 sm:h-12 text-sm sm:text-base dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-violet-400 touch-manipulation transition-colors"
-              >
-                {showPassword ? (
-                  <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-                ) : (
-                  <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-              </button>
-            </div>
+          {/* Main Login Section */}
+          <div className="px-6 sm:px-8 py-6">
+            {/* Microsoft OAuth Button */}
+            <Button
+              onClick={handleMicrosoftLogin}
+              disabled={isMicrosoftLoading || isLoading}
+              className="w-full h-14 min-h-[56px] bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-gray-400 dark:hover:border-gray-600 shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isMicrosoftLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <span className="truncate">{t.authenticating}</span>
+                </>
+              ) : (
+                <>
+                  <MicrosoftIcon />
+                  <div className="ml-3 flex flex-col items-start">
+                    <span className="text-sm font-medium whitespace-nowrap">{t.microsoftButton}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">{t.microsoftSubtext}</span>
+                  </div>
+                </>
+              )}
+            </Button>
 
-            {error && (
-              <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 p-2 rounded border border-red-200 dark:border-red-800/50">{error}</p>
+            {/* Error Message (Account Not Activated or Microsoft Error) */}
+            {error && !showAdminLogin && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-400 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </p>
+              </div>
             )}
 
-            <div className="flex justify-start">
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800"></div>
+              <span className="text-sm text-gray-500 dark:text-gray-500">{t.or}</span>
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800"></div>
+            </div>
+
+            {/* Exceptional Access Toggle - Subtle Text Link */}
+            <div className="text-center min-h-[32px] flex items-center justify-center">
               <button
                 type="button"
-                onClick={onForgotPassword}
-                className="text-xs sm:text-sm text-[#225b73] dark:text-violet-400 hover:underline touch-manipulation py-1 transition-colors"
+                onClick={() => setShowAdminLogin(!showAdminLogin)}
+                disabled={isMicrosoftLoading || isLoading}
+                className="text-xs text-gray-500 dark:text-gray-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors disabled:opacity-50 underline decoration-dotted underline-offset-2 leading-tight"
               >
-                {t.forgotPassword}
+                {t.secondaryAccessToggle}
               </button>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full text-white hover:opacity-90 h-11 sm:h-12 text-sm sm:text-base touch-manipulation bg-[#225b73] dark:bg-gradient-to-r dark:from-violet-600 dark:to-purple-600 dark:hover:from-violet-500 dark:hover:to-purple-500 shadow-md dark:shadow-violet-900/30 transition-all"
-            >
-              {t.login}
-            </Button>
+            {/* Email/Password Login Form (Expandable - for exceptional access and admins) */}
+            {showAdminLogin && (
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+                <form onSubmit={handleEmailPasswordSubmit} className="space-y-4">
+                  {/* Email Field */}
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        id="admin-email"
+                        type="email"
+                        placeholder={t.emailPlaceholder}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                        onBlur={() => setEmailTouched(true)}
+                        disabled={isLoading}
+                        className={`h-11 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all ${
+                          showEmailError 
+                            ? 'border-red-300 dark:border-red-800 focus:border-red-500 focus:ring-red-500/20' 
+                            : emailTouched && isEmailValid
+                            ? 'border-green-300 dark:border-green-800 focus:border-green-500 focus:ring-green-500/20'
+                            : 'focus:border-slate-400 focus:ring-slate-400/20 dark:focus:border-slate-600 dark:focus:ring-slate-600/20'
+                        }`}
+                      />
+                      {emailTouched && isEmailValid && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-600 dark:text-green-500" />
+                      )}
+                      {showEmailError && (
+                        <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-600 dark:text-red-500" />
+                      )}
+                    </div>
+                    {showEmailError && (
+                      <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {t.emailError}
+                      </p>
+                    )}
+                  </div>
 
-            {/* OR Divider */}
-            <div className="relative my-4 sm:my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                  {/* Password Field */}
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        id="admin-password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder={t.passwordPlaceholder}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onBlur={() => setPasswordTouched(true)}
+                        disabled={isLoading}
+                        className={`h-11 pr-10 bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all ${
+                          showPasswordError 
+                            ? 'border-red-300 dark:border-red-800 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'focus:border-slate-400 focus:ring-slate-400/20 dark:focus:border-slate-600 dark:focus:ring-slate-600/20'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
+                      >
+                        {showPassword ? (
+                          <Eye className="w-4 h-4" />
+                        ) : (
+                          <EyeOff className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                    {showPasswordError && (
+                      <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {t.passwordError}
+                      </p>
+                    )}
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={onForgotPassword}
+                        className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+                      >
+                        {t.forgotPassword}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Error Message */}
+                  {error && showAdminLogin && (
+                    <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+                      <p className="text-sm text-red-800 dark:text-red-400 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        {error}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="w-full h-11 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 dark:from-slate-700 dark:to-slate-800 dark:hover:from-slate-600 dark:hover:to-slate-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {t.signingIn}
+                      </>
+                    ) : (
+                      t.signIn
+                    )}
+                  </Button>
+                </form>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-gray-800/90 px-2 text-gray-500 dark:text-gray-400">{t.or}</span>
-              </div>
-            </div>
+            )}
+          </div>
 
-            {/* Admin Login Button */}
-            <Button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                handleSubmit(e, true);
-              }}
-              variant="outline"
-              className="w-full border-[#225b73] dark:border-violet-500/50 text-[#225b73] dark:text-violet-400 hover:bg-[#225b73] dark:hover:bg-violet-600 hover:text-white dark:hover:border-violet-600 h-11 sm:h-12 text-sm sm:text-base touch-manipulation transition-all dark:bg-gray-900/30"
-            >
-              <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-              <span className="truncate">{t.loginAsAdmin}</span>
-            </Button>
-
-            {/* Sign Up Link */}
-            <div className="mt-3 sm:mt-4 mb-2 sm:mb-4 text-center">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                {t.noAccount}{' '}
-                <button
+          {/* Footer */}
+          <div className="px-6 sm:px-8 pb-6">
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex justify-center items-center gap-1 text-xs text-gray-500 dark:text-gray-500">
+                <button 
                   type="button"
-                  onClick={onSignUp}
-                  className="text-[#225b73] dark:text-violet-400 hover:underline touch-manipulation font-medium"
+                  onClick={() => setShowPrivacyPolicy(true)}
+                  className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                 >
-                  {t.signUp}
+                  {t.privacyPolicy}
                 </button>
-              </p>
-            </div>
-          </form>
-
-          {/* Footer Links */}
-          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-center">
-              <button 
-                type="button"
-                onClick={() => setShowPrivacyPolicy(true)}
-                className="text-gray-600 dark:text-gray-400 hover:text-[#225b73] dark:hover:text-violet-400 hover:underline touch-manipulation py-1 transition-colors"
-              >
-                {t.privacyPolicy}
-              </button>
-              <span className="text-gray-300 dark:text-gray-600 hidden sm:inline">|</span>
-              <button 
-                type="button"
-                onClick={() => setShowTerms(true)}
-                className="text-gray-600 dark:text-gray-400 hover:text-[#225b73] dark:hover:text-violet-400 hover:underline touch-manipulation py-1 transition-colors"
-              >
-                {t.termsOfService}
-              </button>
+                <span>{t.and}</span>
+                <button 
+                  type="button"
+                  onClick={() => setShowTerms(true)}
+                  className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                >
+                  {t.termsOfService}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -257,6 +505,18 @@ export function LoginPage({ onLogin, onForgotPassword, onSignUp, language, onLan
         open={showTerms} 
         onClose={() => setShowTerms(false)}
         language={language}
+      />
+
+      {/* Change Password Dialog (for first-time admin login) */}
+      <ChangePasswordDialog
+        open={showPasswordChange}
+        onClose={() => {
+          setShowPasswordChange(false);
+          setIsLoading(false);
+        }}
+        onComplete={handlePasswordChangeComplete}
+        language={language}
+        email={pendingAdminEmail}
       />
     </div>
   );

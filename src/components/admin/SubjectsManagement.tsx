@@ -355,7 +355,7 @@ export function SubjectsManagement({ language }: SubjectsManagementProps) {
                 {filteredSubjects.map((subject) => (
                   <tr key={subject.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="outline" className="text-[#225b73] dark:text-violet-400 border-[#225b73] dark:border-violet-400">
+                      <Badge variant="outline" className="text-[#225b73] dark:text-blue-400 border-[#225b73] dark:border-blue-400">
                         {subject.code}
                       </Badge>
                     </td>

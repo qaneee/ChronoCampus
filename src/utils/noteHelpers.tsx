@@ -123,7 +123,7 @@ export function getCategoryMeta(language: string = 'en'): CategoryMetaMap {
     },
     hy: {
       general: 'Ընդհանուր',
-      homework: 'Տնային Աշխատանք',
+      homework: 'Տնային',
       exam: 'Քննություն',
       important: 'Կարևոր',
       reminder: 'Հիշեցում',
@@ -131,7 +131,7 @@ export function getCategoryMeta(language: string = 'en'): CategoryMetaMap {
     },
     ru: {
       general: 'Общее',
-      homework: 'Домашнее Задание',
+      homework: 'Дом. работа',
       exam: 'Экзамен',
       important: 'Важное',
       reminder: 'Напоминание',

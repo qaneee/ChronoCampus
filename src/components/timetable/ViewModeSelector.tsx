@@ -1,9 +1,16 @@
+/**
+ * ViewModeSelector Component
+ * 
+ * Displays a group selector dropdown to view full group schedules.
+ * The dropdown is always visible and allows users to select any group.
+ */
+
 import { Translations } from '../../types';
 
 interface ViewModeSelectorProps {
-  viewMode: 'my' | 'group';       //ogtagortsoxi ditum ` irany te xmbiny
-  selectedGroup: string;          // yntrats xumv
-  availableGroups: string[];       
+  viewMode: 'my' | 'group';
+  selectedGroup: string;
+  availableGroups: string[];
   onViewModeChange: (mode: 'my' | 'group') => void;
   onGroupChange: (group: string) => void;
   translations: Translations;
