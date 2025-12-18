@@ -1,8 +1,5 @@
-/**
- * ViewModeSelector Component
- * 
+/*
  * Displays a group selector dropdown to view full group schedules.
- * The dropdown is always visible and allows users to select any group.
  */
 
 import { Translations } from '../../types';

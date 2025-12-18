@@ -1,27 +1,9 @@
-/**
- * Timetable Component - Main Container with Enhanced Notes
- * 
- * This is the main timetable page with a comprehensive multi-note system.
- * 
- * Features:
- * - View group schedules via dropdown selector
- * - Filter by week type (numerator/denominator)
- * - Filter by day of the week
- * - Create unlimited notes per class with rich editing
- * - Categorize notes (General, Homework, Exam, Important, Reminder, Question)
- * - Pin important notes
- * - Search and filter notes
- * - Persistent storage using localStorage (notes saved between sessions)
- * - Responsive design for all screen sizes
- * - Multi-language support (English, Armenian, Russian)
- */
-
-import { useState, useEffect } from 'react';
-import { Shield } from 'lucide-react';
-import { Badge } from '../ui/badge';
+import { useState, useEffect } from 'react'; // useState -> if upd -> re-render components, useEffect -> keep upds in localStorage
+import { Shield } from 'lucide-react';    // if userRole == Admin -> Shield -> from lucide icon lib 
+import { Badge } from '../ui/badge';      
 import { Card, CardContent } from '../ui/card';
-import { toast } from 'sonner';
-import { TimetableHeader } from './TimetableHeader';
+import { toast } from 'sonner';         // when added note or sent feedback give toast notification from sonner lib
+import { TimetableHeader } from './TimetableHeader';    
 import { ViewModeSelector } from './ViewModeSelector';
 import { WeekSelector } from './WeekSelector';
 import { DaySelector } from './DaySelector';
@@ -36,49 +18,40 @@ import { mockTimetableData } from '../../constants/mockData';
 import { getUniqueValues } from '../../utils/helpers';
 import { createNote, updateNote } from '../../utils/noteHelpers';
 
-// ============================================================================
-// Component Props
-// ============================================================================
-
+// what props TimeTable gets
 interface TimetableProps {
-  userRole: UserRole;
-  onLogout: () => void;
-  language: Language;
-  onLanguageChange: (language: Language) => void;
-  userName?: string;
+  userRole: UserRole;  // admin | lecturer | student
+  onLogout: () => void;  // no return value, callback func when clicking on Logout
+  language: Language;       // hy | en | ru
+  onLanguageChange: (language: Language) => void; 
+  userName?: string; // can/cant have username
 }
 
-// ============================================================================
 // LocalStorage Keys
-// ============================================================================
-
 const NOTES_STORAGE_KEY = 'chronocampus_class_notes';
 
-// ============================================================================
 // Main Component
-// ============================================================================
-
 export function Timetable({ userRole, onLogout, language, onLanguageChange, userName }: TimetableProps) {
-  // Get translations for current language
-  const t = translations[language];
 
-  // ============================================================================
-  // State Management
-  // ============================================================================
+  // get transations of the current language
+  const t = translations[language];  // -> '../../constants/translations' 
+
+  //-----------------
+  // State Management   -> runtime change => re-render
 
   // Navigation state
-  const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
-  const [selectedWeek, setSelectedWeek] = useState<'numerator' | 'denominator'>('numerator');
+  const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday'); // default open -> Monday
+  const [selectedWeek, setSelectedWeek] = useState<'numerator' | 'denominator'>('numerator'); // default open -> numerator
   
   // View mode state - always in group view mode
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   
-  // Notes state - now supporting multiple notes per class with localStorage persistence
+  // Notes state 
   const [classNotes, setClassNotes] = useState<ClassNotesMap>(() => {
     // Load notes from localStorage on initial render
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') { // client side -> runtime change in browser
       try {
-        const savedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
+        const savedNotes = localStorage.getItem(NOTES_STORAGE_KEY); // gets saved notes from localStorage
         if (savedNotes) {
           return JSON.parse(savedNotes);
         }
@@ -90,43 +63,43 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
   });
   
   // Note editor state
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [notesListDialogOpen, setNotesListDialogOpen] = useState(false);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false); // if editor is open/closed -> note-i nshany aranc bacel
+  const [notesListDialogOpen, setNotesListDialogOpen] = useState(false); // arden notes-y bacel enq
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editingNote, setEditingNote] = useState<Note | null>(null); // if new note -> null, if edit -> true
   
   // Note form state
-  const [noteContent, setNoteContent] = useState('');
-  const [noteCategory, setNoteCategory] = useState<NoteCategory>('general');
-  const [notePinned, setNotePinned] = useState(false);
+  const [noteContent, setNoteContent] = useState(''); // -> content ka te che, datark bacel default
+  const [noteCategory, setNoteCategory] = useState<NoteCategory>('general'); // inch tesaki note a -> default 'general'
+  const [notePinned, setNotePinned] = useState(false); // note-y pin arats a te che ->default false
 
-  // ============================================================================
+  // ==========
   // Effects
-  // ============================================================================
+  // ==========
 
   /**
    * Save notes to localStorage whenever they change
    */
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') { //browser side -> localStorage
       try {
-        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(classNotes));
+        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(classNotes)); //save notes to browser storage
       } catch (error) {
         console.error('Failed to save notes to localStorage:', error);
       }
     }
-  }, [classNotes]);
+  }, [classNotes]); // current notes state object holding all notes
 
-  // ============================================================================
+  // ================
   // Computed Values
-  // ============================================================================
+  // ================
 
   /**
    * Get all available groups from the timetable data
    */
   const availableGroups = getUniqueValues(
-    mockTimetableData.flatMap(session => session.groups)
-  ).sort();
+    mockTimetableData.flatMap(session => session.groups)  // mockData-ic bolor tvyalnery , u sarqum a zangvats
+  ).sort(); // krknvox hanum a,atbenakan karg sort
 
   /**
    * Filter classes based on current selections
@@ -135,29 +108,29 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
     let filtered = mockTimetableData.filter(
       (session) => 
         session.day === selectedDay && 
-        (session.week === selectedWeek || session.week === 'both')
+        (session.week === selectedWeek || session.week === 'both') //aystex filter yst orva, u 2shabatumka te che
     );
 
     // If viewing group schedule, filter by selected group
     if (selectedGroup) {
       filtered = filtered.filter(session => 
-        session.groups.includes(selectedGroup)
+        session.groups.includes(selectedGroup)         // stex filter yst groupi
       );
     }
 
-    return filtered;
+    return filtered;   // filter a anum, vor ed mardy menak ira dasery tena tshvats ory
   };
 
   const filteredClasses = getFilteredClasses();
 
-  // ============================================================================
+  // ==========================
   // Note Management Functions
-  // ============================================================================
+  // ==========================
 
   /**
-   * Reset note form to default state
+   *  NOTE-i Default State-y (function)
    */
-  const resetNoteForm = () => {
+  const resetNoteForm = () => { 
     setNoteContent('');
     setNoteCategory('general');
     setNotePinned(false);
@@ -168,13 +141,13 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
    * Open the note editor for a new note
    */
   const handleAddNote = (classId: number) => {
-    resetNoteForm();
-    setSelectedClassId(classId);
+    resetNoteForm(); // Clears any previous note content, category, pinned status, and editing note reference
+    setSelectedClassId(classId); // associate the note with the correct class
     setNoteDialogOpen(true);
   };
 
   /**
-   * Open the note editor for editing an existing note
+   * EDIT EXISTING NOTE
    */
   const handleEditNote = (note: Note) => {
     setEditingNote(note);
@@ -188,25 +161,26 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
    * Save the current note (create new or update existing)
    */
   const handleSaveNote = () => {
-    if (!selectedClassId || !noteContent.trim()) return;
+    if (!selectedClassId || !noteContent.trim()) return; // ete datark a toxel -> ban mi ara
 
     const classId = selectedClassId;
 
     if (editingNote) {
       // Update existing note
-      const updatedNote = updateNote(editingNote, {
+      const updatedNote = updateNote(editingNote, {      // kanchel update func -> upd content
         content: noteContent.trim(),
-        category: noteCategory,
+        category: noteCategory,  // toxi categorin u pinned ani/poxi
         isPinned: notePinned
       });
 
+      // update a anum
       setClassNotes(prev => ({
         ...prev,
         [classId]: (prev[classId] || []).map(n => 
           n.id === editingNote.id ? updatedNote : n
         )
       }));
-
+      // toast notification a galis
       toast.success(t.noteSaved);
     } else {
       // Create new note
@@ -224,6 +198,7 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
     handleCloseNoteDialog();
   };
 
+ 
   /**
    * Save the current note and keep dialog open to add another
    */
@@ -272,12 +247,12 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
   /**
    * Delete a note
    */
-  const handleDeleteNote = (noteId: string) => {
+  const handleDeleteNote = (noteId: string) => {  //stanum a noteID
     if (!selectedClassId) return;
 
     setClassNotes(prev => ({
       ...prev,
-      [selectedClassId]: (prev[selectedClassId] || []).filter(n => n.id !== noteId)
+      [selectedClassId]: (prev[selectedClassId] || []).filter(n => n.id !== noteId) // pahum a bolory, jnjum a trvats noteID -ovy
     }));
 
     toast.success(t.noteDeleted);
@@ -291,9 +266,9 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
 
     setClassNotes(prev => ({
       ...prev,
-      [selectedClassId]: (prev[selectedClassId] || []).map(note =>
+      [selectedClassId]: (prev[selectedClassId] || []).map(note =>   // talis enq noteID, vori vra piti pin arvi, mnacatsy upd
         note.id === noteId
-          ? updateNote(note, { isPinned: !note.isPinned })
+          ? updateNote(note, { isPinned: !note.isPinned })  // u noteID-> pin
           : note
       )
     }));
@@ -340,9 +315,9 @@ export function Timetable({ userRole, onLogout, language, onLanguageChange, user
     handleEditNote(note);
   };
 
-  // ============================================================================
+  // =======
   // Render
-  // ============================================================================
+  // =======
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-gray-950 dark:via-slate-950 dark:to-gray-950 relative overflow-hidden flex flex-col">

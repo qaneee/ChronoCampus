@@ -1,10 +1,4 @@
-/**
- * DaySelector Component
- * 
- * Displays buttons for each day of the week (Monday - Friday).
- * The selected day is highlighted with the primary color.
- * Supports horizontal scrolling on mobile devices.
- */
+// Displays buttons for each day of the week (Monday - Friday).
 
 import { Calendar } from 'lucide-react';
 import { Button } from '../ui/button';
