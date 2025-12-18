@@ -1,15 +1,3 @@
-/**
- * EnhancedNoteDialog Component
- * 
- * Advanced note editor with rich features:
- * - Category selection
- * - Pin/unpin notes
- * - Character counter
- * - Tags support
- * - Auto-save indicator
- * - Full note metadata display
- */
-
 import { useEffect, useRef } from 'react';
 import { Pin, PinOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
@@ -34,7 +22,7 @@ interface EnhancedNoteDialogProps {
   onCategoryChange: (category: NoteCategory) => void;
   onPinnedChange: (pinned: boolean) => void;
   onSave: () => void;
-  onSaveAndAddAnother: () => void;
+  //onSaveAndAddAnother: () => void;
 }
 
 export function EnhancedNoteDialog({
@@ -51,7 +39,7 @@ export function EnhancedNoteDialog({
   onCategoryChange,
   onPinnedChange,
   onSave,
-  onSaveAndAddAnother
+  //onSaveAndAddAnother
 }: EnhancedNoteDialogProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const categoryMeta = getCategoryMeta(language);

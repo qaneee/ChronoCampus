@@ -1,14 +1,3 @@
-/**
- * NotesListDialog Component
- * 
- * Displays all notes for a specific class with:
- * - Search/filter functionality
- * - Category filtering
- * - Pinned notes at top
- * - Quick actions (edit, delete, pin/unpin)
- * - Empty state
- */
-
 import { useState } from 'react';
 import { Search, Plus, Pin, Edit, Trash2, X, PinOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';

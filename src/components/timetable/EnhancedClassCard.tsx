@@ -11,7 +11,7 @@ interface EnhancedClassCardProps {
   userRole: UserRole;
   translations: Translations;
   language: Language;
-  notes: Note[];
+  notes: Note[]; // note-eri masiv
   onOpenNotesList: () => void;
   onAddNote: () => void;
 }
